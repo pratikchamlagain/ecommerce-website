@@ -1,0 +1,213 @@
+ 
+#header {
+  /* background-color: rgb(185, 180, 180);*/
+  top: 0%;
+  position: sticky;
+      background-color: #1E2A38;
+
+   height: 60px;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   z-index: 1;
+   color: rgb(229, 229, 241);
+  font-size: 16px;
+  font-size:16px;
+}
+
+
+.logo img {
+   height: 80px;
+}
+
+.navbar {
+ display: flex;
+ gap: 40px; /* Adjust spacing between items */
+ margin: 0;
+ padding: 0;
+ align-items: center;
+}
+
+.navbar ol {
+ display: flex;
+ gap: 20px; /* Adjust spacing between menu items */
+ list-style: none;
+ margin: 0;
+ padding: 0;
+}
+
+.navbar ol li {
+ display: flex;
+ align-items: stretch;
+}
+
+
+.navbar ol li a {
+ text-decoration: none;
+ color: rgb(243, 242, 242);
+ font-size: 16px;
+ transition: color 0.3s;
+ margin-left: 5px; /* Adds space between the icon and text */
+}
+
+.navbar ol li a:hover {
+ color: rgb(133, 133, 138);
+}
+.navbar ol li a.active {
+    color: rgb(77, 77, 77);
+}
+.last {
+ display: flex;
+ align-items: center;
+ gap: 20px; 
+ margin-right: 2%;/* Space between the cart and the sign-in button */
+}
+
+.cart {
+ font-size: 24px; /* Adjust the size of the cart icon */
+ color: rgb(243, 242, 242);
+ cursor: pointer;
+ transition: color 0.3s;
+}
+
+.cart:hover {
+ color: rgb(133, 133, 138); /* Hover effect for cart */
+}
+
+.sign {
+ background-color: blue;
+ color: white;
+ padding: 8px 16px; /* Adjust padding for better fit */
+ font-size: 14px;
+ border: none;
+ border-radius: 5px;
+ cursor: pointer;
+ transition: background-color 0.3s;
+}
+
+.sign:hover {
+ background-color: darkblue;
+}
+ 
+.footer {
+        background-color: #1E2A38;
+    color: #fff;
+    padding: 20px 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 0 20px;
+  }
+  
+  .footer-contact,
+  .footer-links,
+  .footer-social {
+    flex: 1 1 300px; /* Responsive layout for smaller screens */
+  }
+  
+  .footer h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #ffd700; /* Highlighted section titles */
+  }
+  
+  .footer p, .footer a {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #ccc;
+    margin: 5px 0;
+    text-decoration: none;
+  }
+  
+  .footer a:hover {
+    color: #fff; /* Highlight links on hover */
+  }
+  
+  .footer-links ul {
+    list-style: none;
+    padding: 0;
+    align-items: center;
+  }
+  
+  .footer-links ul li {
+    margin-bottom: 8px;
+  }
+  
+  .footer-links ul li a {
+    text-decoration: none;
+    color: #ccc;
+  }
+  
+  .footer-links ul li a:hover {
+    color: #ffd700;
+  }
+  
+  .footer-social {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .footer-social .social-icon {
+    font-size: 18px;
+    color: #ccc;
+    transition: color 0.3s;
+  }
+  
+  .footer-social .social-icon:hover {
+    color: #ffd700;
+  }
+  
+  .footer-bottom {
+    text-align: center;
+    font-size: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #444;
+    margin-top: 20px;
+    color: #aaa;
+  }
+
+@media (max-width: 900px) {
+  #header {
+    height: auto;
+    padding: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .logo img {
+    height: 56px;
+  }
+
+  .navbar {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .navbar ol {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .last {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  .footer-container {
+    flex-direction: column;
+  }
+
+  .footer-social {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

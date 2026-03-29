@@ -1,0 +1,284 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Body Styling */
+body {
+    background: #817d7d;
+    color: #1a1b1b;
+}
+
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #333;
+    color: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+}
+
+.navbar .logo a {
+    font-size: 1.5rem;
+    font-weight: bold;
+    position:relative;
+    padding-left: 30px;
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: -10px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+.nav-links li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.nav-links li a:hover {
+    background: #ff6347; /* Highlight effect */
+    color: #fff;
+}
+
+.pic-container {
+    display: flex;
+    grid-template-columns: repeat(autofill, minmax(250px, 1fr));
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Full-Width Image Container */
+.pic {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 500px;
+}
+
+/* Image Styling */
+.pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    display: block;
+    transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+/* Hover Effect on Image */
+.pic:hover img {
+    transform: scale(1.1); /* Slight zoom effect */
+    filter: brightness(80%); /* Dims the image slightly */
+}
+
+/* Overlay Styling */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Hover Effect on Overlay */
+.pic:hover .overlay {
+    opacity: 1;
+}
+
+/* Overlay Text Styling */
+.overlay h2 {
+    font-size: 30px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    margin-bottom: 20px;
+}
+
+.overlay p {
+    font-size: 23px;
+    margin-bottom: 15px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    width: 80rem;
+    max-width: 100%;
+    padding: 0 10px;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.overlay a {
+    text-decoration: none;
+    color: #000;
+    background: #fff;
+    padding: 20px 35px;
+    border-radius: 50px;
+    font-size: 1.5rem;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-weight: 500;
+    transition: background 0.3s, color 0.3s;
+    margin-top: 10px;
+}
+
+.overlay a:hover {
+    background: #000;
+    color: #fff;
+}
+
+.footer {
+    background-color: #1E2A38;
+    color: #fff;
+    padding: 50px 20px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-logo a {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 2px;
+    transition: color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.footer-logo a:hover {
+    color: #ff6347;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.footer-links li {
+    display: inline-block;
+}
+
+.footer-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    margin-top: 20px;
+}
+
+.footer-links a:hover {
+    color: #ff6347;
+}
+
+.footer-socials {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.footer-socials a {
+    color: #fff;
+    font-size: 1.8rem;
+    text-decoration: none;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.footer-socials a:hover {
+    transform: scale(1.2);
+    color: #ff6347;
+}
+
+.footer-bottom {
+    font-size: 0.9rem;
+}
+
+.footer-bottom p {
+    color: #bbb;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .overlay h3,
+    .overlay h2 {
+        font-size: 1.2rem;
+    }
+
+    .overlay p {
+        font-size: 0.85rem;
+    }
+
+    .overlay a {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        background: #444;
+        padding: 10px;
+        border-radius: 5px;
+        display: none; 
+    }
+
+    .footer-container {
+        padding: 20px;
+    }
+
+    .footer-links ul {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .footer-socials {
+        gap: 20px;
+    }
+
+    .footer-logo a {
+        font-size: 1.7rem;
+    }
+}
+
+
+
+  

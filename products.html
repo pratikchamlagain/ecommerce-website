@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/Css/head.css">
+
+  <title>InkJetBazaar - Product</title>
+  <style>
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+    }
+      
+    
+    /* Navbar styling */
+    .back-button {
+      position: fixed;
+      bottom: 20px;
+      /* Position from the top */
+      right: 20px;
+      /* Position from the right */
+      background-color: #f44336;
+      /* Red color */
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      z-index: 1000;
+      /* Ensure it stays on top of other elements */
+    }
+
+    .back-button:hover {
+      background-color: #d32f2f;
+      /* Darker red on hover */
+      transform: scale(1.05);
+    }
+
+    .back-button:active {
+      background-color: #b71c1c;
+      /* Even darker red on click */
+      transform: scale(0.95);
+    }
+
+
+
+    .logo img {
+      height: 80px;
+    }
+
+    
+    /* Main Container */
+    .main-container {
+      padding: 20px;
+      width: 100%;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    /* Row styling */
+    .row {
+      margin-top: 3%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+      /* Space evenly between cards */
+      gap: 20px;
+      /* Adds spacing between rows */
+
+    }
+
+    /* Card styling */
+
+
+    .card h3 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+
+
+    .price {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+
+    .card img {
+      width: 100%;
+      height: 60%;
+    }
+
+    /* Card styling */
+    .card {
+      height: 550px;
+      background-color: rgb(238, 241, 252);
+      box-shadow: 5px 4px 8px 7px rgba(0, 0, 0, 0.2);
+      width: 320px;
+      text-align: center;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    /* Card hover effect */
+    .card:hover {
+      transform: translateY(-10px);
+      /* Lift the card slightly */
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      /* Add a stronger shadow */
+    }
+
+    /*.card:hover img {
+        filter: brightness(1.1); /* Brighten the image slightly 
+      }*/
+
+    /* Button hover effects */
+    span {
+      color: #555;
+    }
+
+    .card button {
+      width: 90%;
+      padding: 10px;
+      margin: 5px auto;
+      border: none;
+      border-radius: 5px;
+      background-color: #000;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .card button:hover {
+      background-color: #555;
+      transform: scale(1.05);
+      /* Slightly increase button size */
+    }
+
+    .card button.learn-more:hover {
+      background-color: #444;
+    }
+
+    
+
+    /* Dropdown container */
+    .sort-container {
+      display: flex;
+      justify-content: flex-end;
+      margin: 10px;
+    }
+
+    .sort-container label {
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    .sort-container select {
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    /*js css*/
+    .main-container {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* Image Section */
+    .image-container {
+      flex: 1;
+      background-color: #f3f3f3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .product-image {
+      height: 300px;
+      width: 300px;
+      max-width: 100%;
+      border-radius: 10px;
+      transition: transform 0.3s;
+    }
+
+    .product-image:hover {
+      transform: scale(1.1);
+    }
+
+    /* Details Section */
+    .details-container {
+      flex: 2;
+      padding: 30px;
+    }
+
+    .product-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .product-price {
+      font-size: 20px;
+      color: #101111;
+      margin: 10px 0;
+    }
+
+    .rating {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+      color: #FFD700;
+    }
+
+    .rating i {
+      margin-right: 5px;
+    }
+
+    .rating-text {
+      margin-left: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .rating-ind {
+      align-items: start;
+    }
+
+    .product-description {
+      font-size: 16px;
+      line-height: 1.5;
+      margin: 20px 0;
+      color: #666;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .add-to-cart {
+      background-color: #151515;
+      color: #fff;
+    }
+
+    .buy-now {
+      background-color: #121212;
+      color: #fff;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .add-to-cart:hover {
+      background-color: #0056b3;
+    }
+
+    .buy-now:hover {
+      background-color: #1c7430;
+    }
+
+    .rating-js {
+      align-items: start;
+      color: #FFD700;
+    }
+  </style>
+
+
+</head>
+
+<body>
+  <header id="header">
+    <div class="logo">
+      <img src="/images/logo.png" alt="logo" />
+    </div>
+    <nav class="navbar">
+      <ol>
+        <li><i class="fas fa-house"></i><a href="home.html">Home</a></li>
+        <li><i class="fas fa-clock"></i><a href="products.html">Products</a></li>
+        <li><i class="fas fa-book-open"></i><a href="research.html">Research</a></li>
+        <li><i class="fas fa-blog"></i><a href="blog.html">Blog</a></li>
+        <li><a href="index.html#about">About Us</a></li>
+      </ol>
+    </nav>
+    <div class="last">
+      <a href="cart.html" style="color: white;"> <i class="fa-solid fa-cart-shopping"></i>
+      </a><!-- S onclick="addToCart()"hopping Cart --> <button type="button" class="sign">Sign-In <i
+          class="fas fa-right-to-bracket"></i></button>
+    </div>
+  </header>
+  <div class="main">
+    <div class="sort-container">
+      <label for="sort">Sort by:</label>
+      <select id="sort">
+        <option value="default">Default</option>
+        <option value="price-low-high">Price: Low to High</option>
+        <option value="price-high-low">Price: High to Low</option>
+        <option value="rating-high-low">Rating: High to Low</option>
+      </select>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="discount" style="margin-top: 3%;">
+      <h2 class="section-title">Discounted Watches</h2>
+      <div class="row">
+        <div class="card">
+          <img src="/images/watch9.webp" alt="Elegant Discount Watch">
+          <h3>Elegant Discount Watch</h3>
+          <div class="rating">★★★★★ <span>(4.9)</span></div>
+          <span class="price">NPR 3,800.00 </span><span style="text-decoration:line-through; color:red;">NPR
+            5,500.00</span>
+          <button onclick="addToCart()">Add to Cart</button>
+          <button class="learn-more" onclick="learnMore()">Learn More</button>
+       
+        </div>
+      <div class="card">
+        <img src="/images/watch5.webp" alt="Stylish Discount Watch">
+        <h3>Stylish Discount Watch</h3>
+        <div class="rating">★★★★☆ <span>(4.6)</span></div>
+        <span class="price">NPR 4,200.00</span> <span style="text-decoration:line-through; color:red;">NPR
+          6,200.00</span>
+        <button onclick="addToCart()">Add to Cart</button>
+        <button class="learn-more" onclick="learnMore()">Learn More</button>
+      </div>
+      <div class="card">
+        <img src="/images/watch4.webp" alt="Classic Discount Watch">
+        <h3>Classic Discount Watch</h3>
+        <div class="rating">★★★★☆ <span>(4.3)</span></div>
+        <span class="price">NPR 3,000.00 </span><span style="text-decoration:line-through; color:red;">NPR
+          4,500.00</span>
+        <button onclick="addToCart()">Add to Cart</button>
+        <button class="learn-more" onclick="learnMore()">Learn More</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card">
+        <img src="/images/watch5.webp" alt="Luxury Discount Watch">
+        <h3>Luxury Discount Watch</h3>
+        <div class="rating">★★★★★ <span>(4.7)</span></div>
+        <span class="price">NPR 5,400.00 </span><span style="text-decoration:line-through; color:red;">NPR
+          8,000.00</span>
+        <button onclick="addToCart()">Add to Cart</button>
+        <button class="learn-more" onclick="learnMore()">Learn More</button>
+      </div>
+      <div class="card">
+        <img src="/images/watch6.webp" alt="Vintage Discount Watch">
+        <h3>Vintage Discount Watch</h3>
+        <div class="rating">★★★★☆ <span>(4.5)</span></div>
+        <span class="price">NPR 3,500.00 </span><span style="text-decoration:line-through; color:red;">NPR
+          5,000.00</span>
+        <button onclick="addToCart()">Add to Cart</button>
+        <button class="learn-more" onclick="learnMore()">Learn More</button>
+      </div>
+      <div class="card">
+        <img src="/images/watch7.webp" alt="Sporty Discount Watch">
+        <h3>Sporty Discount Watch</h3>
+        <div class="rating">★★★★☆ <span>(4.2)</span></div>
+        <span class="price">NPR 2,800.00 </span><span style="text-decoration:line-through; color:red;">NPR
+          4,000.00</span>
+        <button onclick="addToCart()">Add to Cart</button>
+        <button class="learn-more" onclick="learnMore()">Learn More</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">All Watches</h2>
+
+  <div class="main-section">
+
+  </div>
+  </div>
+  <div class="product-div">
+
+  </div>
+  <footer class="footer">
+    <div class="footer-container">
+      <!-- Contact Information -->
+      <div class="footer-contact">
+        <h3>Contact Us</h3>
+        <p><i class="fas fa-envelope"></i> Email: support@watchMatrix.com</p>
+        <p><i class="fas fa-phone"></i> Phone: +977-999999999</p>
+        <p><i class="fas fa-map-marker-alt"></i> Address:itahari, Nepal</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-links">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li><a href="products.html">Products</a></li>
+          <li><a href="research.html">Research</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="index.html#about">About Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Social Media Icons -->
+      <div class="footer-social">
+        <h3>Follow Us</h3>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social-icon"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="social-icon"><i class="fab fa-linkedin"></i></a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Watch Yourself. All rights reserved.</p>
+    </div>
+  </footer>
+  <!-- <script type="text/javascript" src="individual_product.js"></script> -->
+  <script type="text/javascript" src="/javascript/products.js"></script>
+  <script type="text/javascript" src="/javascript/individual_product.js"></script>
+  <script type="text/javascript" src="/javascript/cart.js"></script>
+
+
+
+</body>
+
+</html>

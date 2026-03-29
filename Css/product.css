@@ -1,0 +1,268 @@
+/* Global Style*/
+*{
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+/* Body style */
+body {
+  width: 100%;
+  background-color: #F0F0F0;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Styling title */
+.title {
+  text-align: center;
+  padding: 10px;
+  margin: 0 auto 80px;
+  position: relative;
+  line-height: 60px;
+  color: #555;
+}
+
+/* Line under the title */
+.title::after {
+  content: '';
+  background: #ff523b;
+  width: 80px;
+  height: 5px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Styling offer part */
+.offer {
+  text-align: center;
+  margin-bottom: 20px;
+}
+/* Styling product */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+select{
+  border: 1px solid #ff523b ;
+  padding:5px;
+}
+select{
+  outline: none;
+}
+.product {
+  box-shadow: 0px 7px 7px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: calc(30% - 20px);
+  margin: 10px;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+/* Styling product hover */
+.product:hover {
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Styling main container */
+.main-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  padding-bottom: 20px;
+}
+
+/* Styling product img */
+.product img {
+  display: block;
+  width: 50%;
+  border-radius: 10px 10px 0 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* styling product link */
+.product_link {
+  display: flex;
+  text-decoration: none;
+  justify-content: center;
+  background: #ff523b;
+  color: #fff;
+  padding: 8px 10px;
+  margin: 10px;
+  border-radius: 30px;
+  transition: background 0.5s;
+}
+.cart{
+  display: flex;
+  text-decoration: none;
+  justify-content: center;
+  background: #ff523b;
+  color: #fff;
+  padding: 8px 10px;
+  margin: 10px;
+  border-radius: 30px;
+  transition: background 0.5s;
+}
+.product_desc {
+  text-align: center;
+  padding: 10px;
+}
+
+.product_desc h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.product_desc p {
+  font-size: 14px;
+  color: #555;
+}
+
+.rating {
+  text-align: center;
+  padding: 10px 0;
+}
+
+
+/* Styling for navigation bar */
+.topnav {
+  /* background-color:rgb(107, 113, 126); */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+/* Styling the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+  border-radius: 10px;
+}
+
+
+/* Styling for footer */
+.footer {
+  font-family: 'Poppins', sans-serif;
+  background: #E0E0E0;
+  color: black;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+/* Styling for footer container */
+.footer-container {
+  max-width: 1300px;
+  margin: auto;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+/* Styling for paragraphs within the footer */
+.footer p {
+  color: black;
+}
+
+/* Styling for heading 3 within the footer */
+.footer h3 {
+  color: black;
+  margin: 20px;
+}
+
+/* Styling for footer columns */
+.footer-col-1,
+.footer-col-2,
+.footer-col-3,
+.footer-col-4 {
+  min-width: 250px;
+  margin-bottom: 20px;
+}
+
+/* Styling for the first footer column */
+.footer-col-1 {
+  flex-basis: 30px;
+}
+
+/* Styling for the second footer column */
+.footer-col-2 {
+  flex: 1;
+  text-align: center;
+}
+
+/* Styling for images within the second footer column */
+.footer-col-2 img {
+  width: 180px;
+  margin-bottom: 20px;
+}
+
+/* Styling for the third and fourth footer columns */
+.footer-col-3,
+.footer-col-4 {
+  flex-basis: 12%;
+  text-align: center;
+}
+
+/* Styling for unordered lists */
+ul {
+  list-style: none;
+}
+
+.footer-col-3 ul li:hover,
+.footer-col-4 ul li:hover {
+  color: #ff523b;
+  cursor: pointer;
+}
+
+.footer-col-4 a i {
+  font-size: 30px;
+}
+
+/* Styling for an app logo */
+.app-logo {
+  margin-top: 20px;
+}
+
+/* Styling for images within the app logo */
+.app-logo img {
+  width: 140px;
+}
+
+/* Styling for a horizontal line within the footer */
+.footer hr {
+  border: none;
+  background: #b5b5b5;
+  height: 1px;
+  margin: 20px 0;
+}
+
+/* Styling for copyright text in the center */
+.copyright {
+  text-align: center;
+}
