@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Cart | WatchMatrix</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Css/head.css">
 
@@ -98,6 +98,38 @@ button {
    
 }
 
+.cart-actions {
+    display: flex;
+    gap: 12px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+
+.cart-summary {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px;
+    margin: 14px 0;
+}
+
+.cart-summary p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+@media (max-width: 700px) {
+    .headings {
+        display: none;
+    }
+
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
 /* Hover effect for the button */
 button:hover {
     background-color: #FF2A00; /* Darker red on hover */
@@ -138,7 +170,11 @@ button:focus {
 <div id="main-body">
 
 </div>
-<button onclick="clearCart()">Clear Cart</button>
+<div id="cart-summary" class="cart-summary"></div>
+<div class="cart-actions">
+    <button type="button" onclick="clearCart()">Clear Cart</button>
+    <button id="checkout-btn" type="button" onclick="goToCheckout()">Proceed to Checkout</button>
+</div>
 <footer class="footer">
     <div class="footer-container">
       <!-- Contact Information -->

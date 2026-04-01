@@ -122,23 +122,10 @@ document.addEventListener("DOMContentLoaded", function () {
     renderWatches(watches);
 });
 function addToCart2(img,title,price) {
-    
-    const product = {
-      name: title,
-      price: price,
-      image: img
-    };
-  
-    // Get existing cart from localStorage or initialize a new one
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  
-    // Add the new product to the cart
-    cart.push(product);
-  
-    // Save the updated cart back to localStorage
-    localStorage.setItem("cart", JSON.stringify(cart));
-    
-    alert("Item Added to Cart");
+        if (typeof addOrUpdateCartItem === "function") {
+            addOrUpdateCartItem({ name: title, price: price, image: img }, 1);
+        }
+        alert("Item added to cart");
   }
   
   function makeCart() {
