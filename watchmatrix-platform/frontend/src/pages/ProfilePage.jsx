@@ -16,14 +16,14 @@ export default function ProfilePage() {
 
   return (
     <PageShell title="My Profile">
-      {profileQuery.isPending ? <p>Loading profile...</p> : null}
-      {profileQuery.isError ? <p>Unable to load profile. Please sign in again.</p> : null}
+      {profileQuery.isPending ? <p className="text-slate-300">Loading profile...</p> : null}
+      {profileQuery.isError ? <p className="text-rose-300">Unable to load profile. Please sign in again.</p> : null}
 
       {profileQuery.data ? (
-        <div className="max-w-[420px] rounded-xl border border-slate-200 p-4">
-          <p><strong>Name:</strong> {profileQuery.data.fullName}</p>
-          <p><strong>Email:</strong> {profileQuery.data.email}</p>
-          <button className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white" type="button" onClick={onLogout}>Logout</button>
+        <div className="max-w-[460px] rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-5">
+          <p className="text-slate-200"><strong>Name:</strong> {profileQuery.data.fullName}</p>
+          <p className="text-slate-200"><strong>Email:</strong> {profileQuery.data.email}</p>
+          <button className="rounded-full border border-white/15 bg-slate-900 px-4 py-2 text-slate-100" type="button" onClick={onLogout}>Logout</button>
         </div>
       ) : null}
     </PageShell>

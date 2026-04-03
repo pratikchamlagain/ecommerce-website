@@ -31,10 +31,10 @@ export default function LoginPage() {
 
   return (
     <PageShell title="Login">
-      <form className="mb-4 grid max-w-[420px] gap-2" onSubmit={onSubmit}>
-        <label className="text-sm font-medium" htmlFor="email">Email</label>
+      <form className="mb-4 grid max-w-[440px] gap-2 rounded-2xl border border-white/10 bg-slate-950/50 p-4" onSubmit={onSubmit}>
+        <label className="text-sm font-medium text-slate-200" htmlFor="email">Email</label>
         <input
-          className="rounded-lg border border-slate-300 px-3 py-2"
+          className="rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:border-amber-200/60 focus:outline-none"
           id="email"
           type="email"
           value={form.email}
@@ -42,9 +42,9 @@ export default function LoginPage() {
           required
         />
 
-        <label className="text-sm font-medium" htmlFor="password">Password</label>
+        <label className="text-sm font-medium text-slate-200" htmlFor="password">Password</label>
         <input
-          className="rounded-lg border border-slate-300 px-3 py-2"
+          className="rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:border-amber-200/60 focus:outline-none"
           id="password"
           type="password"
           value={form.password}
@@ -52,15 +52,15 @@ export default function LoginPage() {
           required
         />
 
-        {error ? <p className="m-0 text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="m-0 text-sm text-rose-300">{error}</p> : null}
 
-        <button className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white disabled:opacity-50" type="submit" disabled={isSubmitting}>
+        <button className="rounded-full border border-amber-200/50 bg-amber-200/10 px-4 py-2 font-medium text-amber-100 disabled:opacity-50" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
-      <p className="text-sm text-slate-600">
-        Don&apos;t have an account? <Link className="font-semibold text-slate-900" to="/register">Create one</Link>
+      <p className="text-sm text-slate-300">
+        Don&apos;t have an account? <Link className="font-semibold text-amber-200" to="/register">Create one</Link>
       </p>
     </PageShell>
   );

@@ -44,9 +44,9 @@ export default function CartPage() {
   if (!token) {
     return (
       <PageShell title="Cart">
-        <p className="text-slate-700">You need to sign in to use your cart.</p>
+        <p className="text-slate-300">You need to sign in to use your cart.</p>
         <p className="mt-3">
-          <Link className="rounded-lg bg-slate-900 px-4 py-2 text-white" to="/login">Go to Login</Link>
+          <Link className="rounded-full border border-amber-200/50 bg-amber-200/10 px-4 py-2 font-medium text-amber-100 hover:bg-amber-200/20" to="/login">Go to Login</Link>
         </p>
       </PageShell>
     );
@@ -56,17 +56,17 @@ export default function CartPage() {
   const recommended = productsQuery.data?.items || [];
 
   return (
-    <PageShell title="Cart">
-      {cartQuery.isPending ? <p>Loading cart...</p> : null}
-      {cartQuery.isError ? <p>Unable to load cart.</p> : null}
+    <PageShell title="Your Cart">
+      {cartQuery.isPending ? <p className="text-slate-300">Loading cart...</p> : null}
+      {cartQuery.isError ? <p className="text-rose-300">Unable to load cart.</p> : null}
 
       {cart ? (
         <>
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <p><strong>Total items:</strong> {cart.totals.totalItems}</p>
-            <p><strong>Total amount:</strong> Rs. {cart.totals.totalAmount.toFixed(2)}</p>
+          <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+            <p className="text-slate-200"><strong>Total items:</strong> {cart.totals.totalItems}</p>
+            <p className="text-slate-200"><strong>Total amount:</strong> <span className="text-amber-200">Rs. {cart.totals.totalAmount.toFixed(2)}</span></p>
             <button
-              className="rounded-lg border border-slate-300 bg-slate-900 px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl border border-white/15 bg-slate-900 px-3 py-2 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               type="button"
               onClick={() => clearMutation.mutate()}
               disabled={clearMutation.isPending || cart.items.length === 0}
@@ -76,19 +76,19 @@ export default function CartPage() {
           </div>
 
           <section className="mb-5 grid gap-3">
-            {cart.items.length === 0 ? <p>Your cart is empty.</p> : null}
+            {cart.items.length === 0 ? <p className="rounded-xl border border-white/10 bg-slate-950/40 p-4 text-slate-300">Your cart is empty.</p> : null}
 
             {cart.items.map((item) => (
-              <article className="grid gap-3 rounded-xl border border-slate-200 p-3 sm:grid-cols-[120px_1fr]" key={item.id}>
-                <img className="h-[110px] w-full rounded-lg bg-slate-100 object-cover" src={item.product.imageUrl} alt={item.product.name} loading="lazy" />
+              <article className="grid gap-3 rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-3 sm:grid-cols-[120px_1fr]" key={item.id}>
+                <img className="h-[110px] w-full rounded-xl bg-slate-800 object-cover" src={item.product.imageUrl} alt={item.product.name} loading="lazy" />
                 <div>
-                  <h3 className="mb-1 mt-0 text-base font-semibold">{item.product.name}</h3>
-                  <p className="my-1 text-sm text-slate-500">{item.product.brand}</p>
-                  <p>Rs. {item.product.price.toFixed(2)}</p>
-                  <p>Subtotal: Rs. {item.subtotal.toFixed(2)}</p>
+                  <h3 className="mb-1 mt-0 text-base font-semibold text-white">{item.product.name}</h3>
+                  <p className="my-1 text-sm text-slate-400">{item.product.brand}</p>
+                  <p className="text-slate-200">Rs. {item.product.price.toFixed(2)}</p>
+                  <p className="text-slate-300">Subtotal: <span className="text-amber-200">Rs. {item.subtotal.toFixed(2)}</span></p>
                   <div className="mt-2 flex items-center gap-2">
                     <button
-                      className="rounded-lg border border-slate-300 bg-slate-900 px-3 py-1 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-white/15 bg-slate-900 px-3 py-1 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                       type="button"
                       onClick={() => updateMutation.mutate({ itemId: item.id, quantity: Math.max(1, item.quantity - 1) })}
                       disabled={item.quantity <= 1 || updateMutation.isPending}
@@ -97,7 +97,7 @@ export default function CartPage() {
                     </button>
                     <span>{item.quantity}</span>
                     <button
-                      className="rounded-lg border border-slate-300 bg-slate-900 px-3 py-1 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-white/15 bg-slate-900 px-3 py-1 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                       type="button"
                       onClick={() => updateMutation.mutate({ itemId: item.id, quantity: item.quantity + 1 })}
                       disabled={updateMutation.isPending}
@@ -105,7 +105,7 @@ export default function CartPage() {
                       +
                     </button>
                     <button
-                      className="rounded-lg border border-slate-300 bg-slate-900 px-3 py-1 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-rose-300/40 bg-rose-300/10 px-3 py-1 text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
                       type="button"
                       onClick={() => removeMutation.mutate(item.id)}
                       disabled={removeMutation.isPending}
@@ -118,16 +118,16 @@ export default function CartPage() {
             ))}
           </section>
 
-          <h3 className="mb-2 text-lg font-semibold">Add More Products</h3>
+          <h3 className="mb-2 text-lg font-semibold text-white">Add More Products</h3>
           <section className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3">
             {recommended.map((product) => (
-              <article className="rounded-xl border border-slate-200 bg-white p-3" key={product.id}>
-                <img className="h-44 w-full rounded-lg bg-slate-100 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
-                <h3 className="mb-1 mt-3 text-base font-semibold">{product.name}</h3>
-                <p className="my-1 text-sm text-slate-500">{product.brand}</p>
-                <p className="mt-2 font-bold text-slate-900">Rs. {product.price.toFixed(2)}</p>
+              <article className="rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-3" key={product.id}>
+                <img className="h-44 w-full rounded-xl bg-slate-800 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
+                <h3 className="mb-1 mt-3 text-base font-semibold text-white">{product.name}</h3>
+                <p className="my-1 text-sm text-slate-400">{product.brand}</p>
+                <p className="mt-2 font-bold text-amber-200">Rs. {product.price.toFixed(2)}</p>
                 <button
-                  className="mt-3 rounded-lg border border-slate-300 bg-slate-900 px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-3 rounded-xl border border-amber-200/50 bg-amber-200/10 px-3 py-2 font-medium text-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
                   type="button"
                   onClick={() => addMutation.mutate({ productId: product.id, quantity: 1 })}
                   disabled={addMutation.isPending}
