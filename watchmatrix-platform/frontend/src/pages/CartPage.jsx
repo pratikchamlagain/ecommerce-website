@@ -46,7 +46,7 @@ export default function CartPage() {
       <PageShell title="Cart">
         <p className="text-slate-300">You need to sign in to use your cart.</p>
         <p className="mt-3">
-          <Link className="rounded-full border border-amber-200/50 bg-amber-200/10 px-4 py-2 font-medium text-amber-100 hover:bg-amber-200/20" to="/login">Go to Login</Link>
+          <Link className="wm-btn-primary" to="/login">Go to Login</Link>
         </p>
       </PageShell>
     );
@@ -62,11 +62,11 @@ export default function CartPage() {
 
       {cart ? (
         <>
-          <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+          <div className="wm-panel mb-5 flex flex-wrap items-center gap-3">
             <p className="text-slate-200"><strong>Total items:</strong> {cart.totals.totalItems}</p>
-            <p className="text-slate-200"><strong>Total amount:</strong> <span className="text-amber-200">Rs. {cart.totals.totalAmount.toFixed(2)}</span></p>
+            <p className="text-slate-200"><strong>Total amount:</strong> <span className="wm-price">Rs. {cart.totals.totalAmount.toFixed(2)}</span></p>
             <button
-              className="rounded-xl border border-white/15 bg-slate-900 px-3 py-2 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="wm-btn-secondary"
               type="button"
               onClick={() => clearMutation.mutate()}
               disabled={clearMutation.isPending || cart.items.length === 0}
@@ -76,19 +76,19 @@ export default function CartPage() {
           </div>
 
           <section className="mb-5 grid gap-3">
-            {cart.items.length === 0 ? <p className="rounded-xl border border-white/10 bg-slate-950/40 p-4 text-slate-300">Your cart is empty.</p> : null}
+            {cart.items.length === 0 ? <p className="wm-panel wm-muted">Your cart is empty.</p> : null}
 
             {cart.items.map((item) => (
-              <article className="grid gap-3 rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-3 sm:grid-cols-[120px_1fr]" key={item.id}>
+              <article className="wm-card grid gap-3 p-3 sm:grid-cols-[120px_1fr]" key={item.id}>
                 <img className="h-[110px] w-full rounded-xl bg-slate-800 object-cover" src={item.product.imageUrl} alt={item.product.name} loading="lazy" />
                 <div>
                   <h3 className="mb-1 mt-0 text-base font-semibold text-white">{item.product.name}</h3>
                   <p className="my-1 text-sm text-slate-400">{item.product.brand}</p>
                   <p className="text-slate-200">Rs. {item.product.price.toFixed(2)}</p>
-                  <p className="text-slate-300">Subtotal: <span className="text-amber-200">Rs. {item.subtotal.toFixed(2)}</span></p>
+                  <p className="text-slate-300">Subtotal: <span className="wm-price">Rs. {item.subtotal.toFixed(2)}</span></p>
                   <div className="mt-2 flex items-center gap-2">
                     <button
-                      className="rounded-lg border border-white/15 bg-slate-900 px-3 py-1 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="wm-btn-secondary px-3 py-1"
                       type="button"
                       onClick={() => updateMutation.mutate({ itemId: item.id, quantity: Math.max(1, item.quantity - 1) })}
                       disabled={item.quantity <= 1 || updateMutation.isPending}
@@ -97,7 +97,7 @@ export default function CartPage() {
                     </button>
                     <span>{item.quantity}</span>
                     <button
-                      className="rounded-lg border border-white/15 bg-slate-900 px-3 py-1 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="wm-btn-secondary px-3 py-1"
                       type="button"
                       onClick={() => updateMutation.mutate({ itemId: item.id, quantity: item.quantity + 1 })}
                       disabled={updateMutation.isPending}
@@ -121,13 +121,13 @@ export default function CartPage() {
           <h3 className="mb-2 text-lg font-semibold text-white">Add More Products</h3>
           <section className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3">
             {recommended.map((product) => (
-              <article className="rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-3" key={product.id}>
+              <article className="wm-card p-3" key={product.id}>
                 <img className="h-44 w-full rounded-xl bg-slate-800 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
                 <h3 className="mb-1 mt-3 text-base font-semibold text-white">{product.name}</h3>
                 <p className="my-1 text-sm text-slate-400">{product.brand}</p>
-                <p className="mt-2 font-bold text-amber-200">Rs. {product.price.toFixed(2)}</p>
+                <p className="wm-price mt-2 font-bold">Rs. {product.price.toFixed(2)}</p>
                 <button
-                  className="mt-3 rounded-xl border border-amber-200/50 bg-amber-200/10 px-3 py-2 font-medium text-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="wm-btn-primary mt-3 rounded-xl px-3"
                   type="button"
                   onClick={() => addMutation.mutate({ productId: product.id, quantity: 1 })}
                   disabled={addMutation.isPending}

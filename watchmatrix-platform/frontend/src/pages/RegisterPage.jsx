@@ -28,10 +28,10 @@ export default function RegisterPage() {
 
   return (
     <PageShell title="Register">
-      <form className="mb-4 grid max-w-[440px] gap-2 rounded-2xl border border-white/10 bg-slate-950/50 p-4" onSubmit={onSubmit}>
+      <form className="wm-panel mb-4 grid max-w-[440px] gap-2" onSubmit={onSubmit}>
         <label className="text-sm font-medium text-slate-200" htmlFor="fullName">Full Name</label>
         <input
-          className="rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:border-amber-200/60 focus:outline-none"
+          className="wm-input"
           id="fullName"
           type="text"
           value={form.fullName}
@@ -41,7 +41,7 @@ export default function RegisterPage() {
 
         <label className="text-sm font-medium text-slate-200" htmlFor="email">Email</label>
         <input
-          className="rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:border-amber-200/60 focus:outline-none"
+          className="wm-input"
           id="email"
           type="email"
           value={form.email}
@@ -51,7 +51,7 @@ export default function RegisterPage() {
 
         <label className="text-sm font-medium text-slate-200" htmlFor="password">Password</label>
         <input
-          className="rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:border-amber-200/60 focus:outline-none"
+          className="wm-input"
           id="password"
           type="password"
           value={form.password}
@@ -62,13 +62,13 @@ export default function RegisterPage() {
 
         {error ? <p className="m-0 text-sm text-rose-300">{error}</p> : null}
 
-        <button className="rounded-full border border-amber-200/50 bg-amber-200/10 px-4 py-2 font-medium text-amber-100 disabled:opacity-50" type="submit" disabled={isSubmitting}>
+        <button className="wm-btn-primary" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating account..." : "Create account"}
         </button>
       </form>
 
       <p className="text-sm text-slate-300">
-        Already have an account? <Link className="font-semibold text-amber-200" to="/login">Sign in</Link>
+        Already have an account? <Link className="font-semibold wm-price" to="/login">Sign in</Link>
       </p>
     </PageShell>
   );

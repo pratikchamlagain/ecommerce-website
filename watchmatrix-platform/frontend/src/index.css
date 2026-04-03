@@ -5,6 +5,46 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --wm-accent: #f9d57d;
+    --wm-accent-soft: rgb(249 213 125 / 0.15);
+    --wm-accent-border: rgb(249 213 125 / 0.45);
+    --wm-highlight: rgb(249 213 125 / 0.1);
+    --wm-bg-from: #020617;
+    --wm-bg-via: #0f172a;
+    --wm-bg-to: #1c1917;
+  }
+
+  [data-theme="luxury-gold"] {
+    --wm-accent: #f9d57d;
+    --wm-accent-soft: rgb(249 213 125 / 0.15);
+    --wm-accent-border: rgb(249 213 125 / 0.45);
+    --wm-highlight: rgb(249 213 125 / 0.1);
+    --wm-bg-from: #020617;
+    --wm-bg-via: #0f172a;
+    --wm-bg-to: #1c1917;
+  }
+
+  [data-theme="ocean-steel"] {
+    --wm-accent: #7dd3fc;
+    --wm-accent-soft: rgb(125 211 252 / 0.15);
+    --wm-accent-border: rgb(125 211 252 / 0.5);
+    --wm-highlight: rgb(56 189 248 / 0.14);
+    --wm-bg-from: #020617;
+    --wm-bg-via: #082f49;
+    --wm-bg-to: #172554;
+  }
+
+  [data-theme="graphite-red"] {
+    --wm-accent: #fca5a5;
+    --wm-accent-soft: rgb(252 165 165 / 0.15);
+    --wm-accent-border: rgb(252 165 165 / 0.45);
+    --wm-highlight: rgb(248 113 113 / 0.14);
+    --wm-bg-from: #030712;
+    --wm-bg-via: #1f2937;
+    --wm-bg-to: #3f1d1d;
+  }
+
   body {
     @apply m-0 bg-slate-950 text-slate-100 antialiased;
     font-family: "Manrope", "Segoe UI", sans-serif;
@@ -12,5 +52,51 @@
 
   * {
     @apply box-border;
+  }
+}
+
+@layer components {
+  .wm-btn-primary {
+    @apply rounded-full border px-4 py-2 font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--wm-accent-soft);
+    border-color: var(--wm-accent-border);
+    color: var(--wm-accent);
+  }
+
+  .wm-btn-primary:hover {
+    background-color: color-mix(in srgb, var(--wm-accent) 22%, transparent);
+  }
+
+  .wm-btn-secondary {
+    @apply rounded-xl border border-white/15 bg-slate-900 px-3 py-2 text-slate-100 transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .wm-input {
+    @apply rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none;
+  }
+
+  .wm-panel {
+    @apply rounded-2xl border border-white/10 bg-slate-950/50 p-4;
+  }
+
+  .wm-nav-link {
+    @apply rounded-full border border-white/10 px-3 py-1.5 text-slate-300 transition;
+  }
+
+  .wm-nav-link:hover {
+    border-color: var(--wm-accent-border);
+    color: var(--wm-accent);
+  }
+
+  .wm-card {
+    @apply rounded-2xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950;
+  }
+
+  .wm-muted {
+    @apply text-slate-300;
+  }
+
+  .wm-price {
+    color: var(--wm-accent);
   }
 }
