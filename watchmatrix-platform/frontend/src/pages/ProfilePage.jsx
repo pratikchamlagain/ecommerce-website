@@ -20,10 +20,10 @@ export default function ProfilePage() {
       {profileQuery.isError ? <p>Unable to load profile. Please sign in again.</p> : null}
 
       {profileQuery.data ? (
-        <div className="profile-card">
+        <div className="max-w-[420px] rounded-xl border border-slate-200 p-4">
           <p><strong>Name:</strong> {profileQuery.data.fullName}</p>
           <p><strong>Email:</strong> {profileQuery.data.email}</p>
-          <button type="button" onClick={onLogout}>Logout</button>
+          <button className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white" type="button" onClick={onLogout}>Logout</button>
         </div>
       ) : null}
     </PageShell>

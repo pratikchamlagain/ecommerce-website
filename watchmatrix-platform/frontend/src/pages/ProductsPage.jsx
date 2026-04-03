@@ -42,20 +42,22 @@ export default function ProductsPage() {
 
   return (
     <PageShell title="Products">
-      <form className="products-filters" onSubmit={onSearchSubmit}>
+      <form className="mb-4 grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_auto]" onSubmit={onSearchSubmit}>
         <input
+          className="rounded-lg border border-slate-300 px-3 py-2"
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search name, brand, or description"
         />
         <input
+          className="rounded-lg border border-slate-300 px-3 py-2"
           type="text"
           value={category}
           onChange={(event) => setCategory(event.target.value)}
           placeholder="Category slug (e.g. men, women)"
         />
-        <button type="submit">Apply</button>
+        <button className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white" type="submit">Apply</button>
       </form>
 
       {productsQuery.isPending ? <p>Loading products...</p> : null}
@@ -65,31 +67,33 @@ export default function ProductsPage() {
         <p>No products found yet. Add data or adjust filters.</p>
       ) : null}
 
-      <section className="products-grid">
+      <section className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3">
         {products.map((product) => (
-          <article className="product-card" key={product.id}>
-            <img src={product.imageUrl} alt={product.name} loading="lazy" />
-            <h3>{product.name}</h3>
-            <p className="muted">{product.brand}</p>
-            <p className="muted">{product.category?.name || "Uncategorized"}</p>
-            <p className="price">Rs. {Number(product.price).toFixed(2)}</p>
+          <article className="rounded-xl border border-slate-200 bg-white p-3" key={product.id}>
+            <img className="h-44 w-full rounded-lg bg-slate-100 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
+            <h3 className="mb-1 mt-3 text-base font-semibold">{product.name}</h3>
+            <p className="my-1 text-sm text-slate-500">{product.brand}</p>
+            <p className="my-1 text-sm text-slate-500">{product.category?.name || "Uncategorized"}</p>
+            <p className="mt-2 font-bold text-slate-900">Rs. {Number(product.price).toFixed(2)}</p>
           </article>
         ))}
       </section>
 
       {pagination ? (
-        <div className="pagination">
+        <div className="mt-4 flex flex-col items-stretch justify-between gap-2 sm:flex-row sm:items-center">
           <button
+            className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             disabled={page <= 1}
           >
             Previous
           </button>
-          <span>
+          <span className="text-sm text-slate-600">
             Page {pagination.page} of {pagination.totalPages}
           </span>
           <button
+            className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             onClick={() => setPage((prev) => Math.min(pagination.totalPages, prev + 1))}
             disabled={page >= pagination.totalPages}

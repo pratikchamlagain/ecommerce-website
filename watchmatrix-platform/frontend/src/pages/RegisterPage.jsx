@@ -28,9 +28,10 @@ export default function RegisterPage() {
 
   return (
     <PageShell title="Register">
-      <form className="auth-form" onSubmit={onSubmit}>
-        <label htmlFor="fullName">Full Name</label>
+      <form className="mb-4 grid max-w-[420px] gap-2" onSubmit={onSubmit}>
+        <label className="text-sm font-medium" htmlFor="fullName">Full Name</label>
         <input
+          className="rounded-lg border border-slate-300 px-3 py-2"
           id="fullName"
           type="text"
           value={form.fullName}
@@ -38,8 +39,9 @@ export default function RegisterPage() {
           required
         />
 
-        <label htmlFor="email">Email</label>
+        <label className="text-sm font-medium" htmlFor="email">Email</label>
         <input
+          className="rounded-lg border border-slate-300 px-3 py-2"
           id="email"
           type="email"
           value={form.email}
@@ -47,8 +49,9 @@ export default function RegisterPage() {
           required
         />
 
-        <label htmlFor="password">Password</label>
+        <label className="text-sm font-medium" htmlFor="password">Password</label>
         <input
+          className="rounded-lg border border-slate-300 px-3 py-2"
           id="password"
           type="password"
           value={form.password}
@@ -57,15 +60,15 @@ export default function RegisterPage() {
           required
         />
 
-        {error ? <p className="error-text">{error}</p> : null}
+        {error ? <p className="m-0 text-sm text-red-700">{error}</p> : null}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button className="rounded-lg border border-slate-300 bg-slate-900 px-4 py-2 text-white disabled:opacity-50" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating account..." : "Create account"}
         </button>
       </form>
 
-      <p>
-        Already have an account? <Link to="/login">Sign in</Link>
+      <p className="text-sm text-slate-600">
+        Already have an account? <Link className="font-semibold text-slate-900" to="/login">Sign in</Link>
       </p>
     </PageShell>
   );
