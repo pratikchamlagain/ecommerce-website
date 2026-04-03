@@ -136,3 +136,38 @@ main h2 {
     align-items: stretch;
   }
 }
+
+.auth-form {
+  max-width: 420px;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-form input,
+.auth-form button,
+.profile-card button {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.auth-form button,
+.profile-card button {
+  background: #0f172a;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.error-text {
+  color: #b91c1c;
+  margin: 0;
+}
+
+.profile-card {
+  max-width: 420px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+}

@@ -1,47 +1,45 @@
-# WatchMatrix Platform (Day 1 Scaffold)
+# WatchMatrix Platform
 
-This folder contains the new React + Node.js migration workspace.
+This workspace contains the migrated full-stack application.
 
-## Workspace Structure
+## Structure
 
-- `apps/web`: React (Vite) frontend
-- `apps/api`: Express + Prisma backend
+- `frontend`: React (Vite) client
+- `backend`: Express + Prisma API
 
-## Apps
+## Run Frontend
 
-- `frontend`: React (Vite) frontend
-- `backend`: Express + Prisma backend
-- Backend scaffold with Express app and health endpoint:
-  - `GET /api/v1/health`
-  - `User`, `Category`, `Product`, `Cart`, `CartItem`
-
-
-cd apps/web
+```bash
+cd frontend
 npm install
 npm run dev
 ```
-cd frontend
+
 ## Run Backend
 
 ```bash
-cd apps/api
+cd backend
 npm install
 npm run dev
 ```
-cd backend
-## Prisma Notes
 
-Before migration commands, update `DATABASE_URL` in `apps/api/.env`.
+## Prisma Setup
+
+Update `DATABASE_URL` in `backend/.env`, then run:
 
 ```bash
-cd apps/api
+cd backend
 npx prisma generate
 npx prisma migrate dev --name init
+npm run prisma:seed
 ```
-cd backend
-## Next (Day 2)
 
-- Build auth module (register/login/me)
-- Add request validation and centralized error middleware
-- Add product list endpoint with pagination + filtering
+## Current API
+
+- `GET /api/v1/health`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
+- `GET /api/v1/products`
+- `GET /api/v1/products/:slug`
 

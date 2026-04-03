@@ -11,6 +11,9 @@ export default function PageShell({ title, children }) {
           <Link to="/cart">Cart</Link>
           <Link to="/checkout">Checkout</Link>
           <Link to="/about">About</Link>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Register</Link>
+          <Link to="/profile">Profile</Link>
         </nav>
       </header>
 
