@@ -1,19 +1,65 @@
 import PageShell from "../components/common/PageShell";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../lib/productsApi";
 
 export default function ProductsPage() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "createdAt");
+  const [sortOrder, setSortOrder] = useState(searchParams.get("sortOrder") || "desc");
+  const [page, setPage] = useState(Number(searchParams.get("page") || 1));
+
+  const quickCategories = ["", "men", "women", "kids", "luxury"];
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+    setCategory(searchParams.get("category") || "");
+    setSortBy(searchParams.get("sortBy") || "createdAt");
+    setSortOrder(searchParams.get("sortOrder") || "desc");
+    setPage(Number(searchParams.get("page") || 1));
+  }, [searchParams]);
+
+  function applyFilters(next) {
+    const merged = {
+      search,
+      category,
+      sortBy,
+      sortOrder,
+      page,
+      ...next
+    };
+
+    const params = new URLSearchParams();
+
+    if (merged.search?.trim()) {
+      params.set("search", merged.search.trim());
+    }
+
+    if (merged.category?.trim()) {
+      params.set("category", merged.category.trim());
+    }
+
+    if (merged.sortBy && merged.sortBy !== "createdAt") {
+      params.set("sortBy", merged.sortBy);
+    }
+
+    if (merged.sortOrder && merged.sortOrder !== "desc") {
+      params.set("sortOrder", merged.sortOrder);
+    }
+
+    params.set("page", String(Math.max(1, Number(merged.page) || 1)));
+    setSearchParams(params);
+  }
 
   const queryParams = useMemo(() => {
     const params = {
       page,
       limit: 8,
-      sortBy: "createdAt",
-      sortOrder: "desc"
+      sortBy,
+      sortOrder
     };
 
     if (search.trim()) {
@@ -25,7 +71,7 @@ export default function ProductsPage() {
     }
 
     return params;
-  }, [category, page, search]);
+  }, [category, page, search, sortBy, sortOrder]);
 
   const productsQuery = useQuery({
     queryKey: ["products", queryParams],
@@ -37,11 +83,33 @@ export default function ProductsPage() {
 
   function onSearchSubmit(event) {
     event.preventDefault();
-    setPage(1);
+    applyFilters({ page: 1, search, category, sortBy, sortOrder });
   }
 
   return (
     <PageShell title="Explore Collection">
+      <section className="wm-panel mb-4 flex flex-wrap items-center gap-2">
+        {quickCategories.map((cat) => {
+          const label = cat ? cat[0].toUpperCase() + cat.slice(1) : "All";
+          const isActive = category === cat;
+
+          return (
+            <button
+              className={isActive ? "wm-btn-primary px-3 py-1 text-xs" : "wm-btn-secondary px-3 py-1 text-xs"}
+              key={cat || "all"}
+              type="button"
+              onClick={() => {
+                setCategory(cat);
+                setPage(1);
+                applyFilters({ category: cat, page: 1 });
+              }}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </section>
+
       <form className="wm-panel mb-5 grid grid-cols-1 gap-2 p-3 md:grid-cols-[1fr_1fr_auto]" onSubmit={onSearchSubmit}>
         <input
           className="wm-input"
@@ -57,7 +125,51 @@ export default function ProductsPage() {
           onChange={(event) => setCategory(event.target.value)}
           placeholder="Category slug (e.g. men, women)"
         />
-        <button className="wm-btn-primary rounded-xl" type="submit">Apply</button>
+
+        <div className="grid grid-cols-2 gap-2">
+          <select
+            className="wm-input"
+            value={sortBy}
+            onChange={(event) => {
+              setSortBy(event.target.value);
+              applyFilters({ sortBy: event.target.value, page: 1 });
+            }}
+          >
+            <option value="createdAt">Newest</option>
+            <option value="price">Price</option>
+            <option value="name">Name</option>
+          </select>
+
+          <select
+            className="wm-input"
+            value={sortOrder}
+            onChange={(event) => {
+              setSortOrder(event.target.value);
+              applyFilters({ sortOrder: event.target.value, page: 1 });
+            }}
+          >
+            <option value="desc">Desc</option>
+            <option value="asc">Asc</option>
+          </select>
+        </div>
+
+        <div className="flex flex-wrap gap-2 md:col-span-3">
+          <button className="wm-btn-primary rounded-xl" type="submit">Apply</button>
+          <button
+            className="wm-btn-secondary"
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setCategory("");
+              setSortBy("createdAt");
+              setSortOrder("desc");
+              setPage(1);
+              setSearchParams(new URLSearchParams({ page: "1" }));
+            }}
+          >
+            Clear Filters
+          </button>
+        </div>
       </form>
 
       {productsQuery.isPending ? <p className="text-slate-300">Loading products...</p> : null}
@@ -70,8 +182,12 @@ export default function ProductsPage() {
       <section className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
         {products.map((product) => (
           <article className="wm-card overflow-hidden p-3 shadow-xl shadow-black/20" key={product.id}>
-            <img className="h-48 w-full rounded-xl bg-slate-800 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
-            <h3 className="mb-1 mt-3 text-base font-semibold text-white">{product.name}</h3>
+            <Link to={`/products/${product.slug}`}>
+              <img className="h-48 w-full rounded-xl bg-slate-800 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
+            </Link>
+            <h3 className="mb-1 mt-3 text-base font-semibold text-white">
+              <Link className="hover:underline" to={`/products/${product.slug}`}>{product.name}</Link>
+            </h3>
             <p className="my-1 text-sm text-slate-400">{product.brand}</p>
             <p className="my-1 text-sm text-slate-400">{product.category?.name || "Uncategorized"}</p>
             <p className="wm-price mt-2 font-bold">Rs. {Number(product.price).toFixed(2)}</p>
@@ -84,7 +200,11 @@ export default function ProductsPage() {
           <button
             className="wm-btn-secondary px-4"
             type="button"
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            onClick={() => {
+              const next = Math.max(1, page - 1);
+              setPage(next);
+              applyFilters({ page: next });
+            }}
             disabled={page <= 1}
           >
             Previous
@@ -95,7 +215,11 @@ export default function ProductsPage() {
           <button
             className="wm-btn-secondary px-4"
             type="button"
-            onClick={() => setPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+            onClick={() => {
+              const next = Math.min(pagination.totalPages, page + 1);
+              setPage(next);
+              applyFilters({ page: next });
+            }}
             disabled={page >= pagination.totalPages}
           >
             Next
