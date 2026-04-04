@@ -137,6 +137,20 @@ export default function CartPage() {
               </article>
             ))}
           </section>
+
+          {cart.items.length > 0 ? (
+            <div className="fixed bottom-4 left-1/2 z-40 w-[min(96%,760px)] -translate-x-1/2 rounded-2xl border border-white/15 bg-slate-950/90 p-3 shadow-2xl shadow-black/40 backdrop-blur">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="m-0 text-sm text-slate-300">{cart.totals.totalItems} item(s) in cart</p>
+                  <p className="m-0 text-lg font-bold wm-price">Rs. {cart.totals.totalAmount.toFixed(2)}</p>
+                </div>
+                <Link className="wm-btn-primary inline-flex items-center" to="/checkout">
+                  Proceed to Checkout
+                </Link>
+              </div>
+            </div>
+          ) : null}
         </>
       ) : null}
     </PageShell>
