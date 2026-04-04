@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { fetchProducts } from "../lib/productsApi";
 import { addToCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
+import { getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function HomePage() {
   const token = getAccessToken();
@@ -72,7 +73,7 @@ export default function HomePage() {
         <img
           alt="Luxury watch hero"
           className="h-[520px] w-full object-cover opacity-55"
-          src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1920&q=80"
+          src={getCategoryLegacyImage("luxury")}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10" />
 
@@ -142,6 +143,15 @@ export default function HomePage() {
         <div className="grid gap-5">
           {groupedProducts.map((group) => (
             <article className="wm-panel" key={group.slug}>
+              <Link to={`/products?category=${group.slug}&page=1`}>
+                <img
+                  className="mb-3 h-44 w-full rounded-2xl object-cover"
+                  src={getCategoryLegacyImage(group.slug)}
+                  alt={`${group.label} category`}
+                  loading="lazy"
+                />
+              </Link>
+
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h4 className="m-0 text-2xl text-slate-900">{group.label}</h4>
                 <Link className="wm-price text-sm font-semibold" to={`/products?category=${group.slug}&page=1`}>
