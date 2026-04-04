@@ -5,6 +5,7 @@ import PageShell from "../components/common/PageShell";
 import { fetchProductBySlug, fetchProducts } from "../lib/productsApi";
 import { addToCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
+import { getBrandLegacyImage, getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function ProductDetailPage() {
   const { slug = "" } = useParams();
@@ -24,18 +25,30 @@ export default function ProductDetailPage() {
 
   const product = productQuery.data;
 
+  function resolveProductImage(item) {
+    const fromApi = item?.imageUrl;
+
+    if (typeof fromApi === "string" && fromApi.trim()) {
+      return fromApi;
+    }
+
+    return getBrandLegacyImage(item?.brand) || getCategoryLegacyImage(item?.category?.slug);
+  }
+
   const galleryImages = useMemo(() => {
-    if (!product?.imageUrl) {
+    const sourceImage = resolveProductImage(product);
+
+    if (!sourceImage) {
       return [];
     }
 
     return [
-      `${product.imageUrl}?auto=format&fit=crop&w=1400&q=80`,
-      `${product.imageUrl}?auto=format&fit=crop&w=1200&h=900&q=80`,
-      `${product.imageUrl}?auto=format&fit=crop&w=1200&h=1000&q=80`,
-      `${product.imageUrl}?auto=format&fit=crop&w=1200&h=800&q=80`
+      `${sourceImage}`,
+      `${sourceImage}`,
+      `${sourceImage}`,
+      `${sourceImage}`
     ];
-  }, [product?.imageUrl]);
+  }, [product]);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -57,7 +70,7 @@ export default function ProductDetailPage() {
 
   const relatedProducts = relatedQuery.data || [];
 
-  const activeImage = galleryImages[activeImageIndex] || product?.imageUrl;
+  const activeImage = galleryImages[activeImageIndex] || resolveProductImage(product);
 
   return (
     <PageShell title="Product Detail">
@@ -79,7 +92,7 @@ export default function ProductDetailPage() {
                 {galleryImages.map((image, index) => (
                   <button
                     className={index === activeImageIndex ? "overflow-hidden rounded-xl border-2 border-white/60" : "overflow-hidden rounded-xl border border-white/10"}
-                    key={image}
+                    key={`${image}-${index}`}
                     type="button"
                     onClick={() => setActiveImageIndex(index)}
                   >
@@ -140,7 +153,7 @@ export default function ProductDetailPage() {
               {relatedProducts.map((item) => (
                 <article className="wm-card p-3" key={item.id}>
                   <Link to={`/products/${item.slug}`}>
-                    <img className="h-40 w-full rounded-xl bg-slate-800 object-cover" src={item.imageUrl} alt={item.name} loading="lazy" />
+                    <img className="h-40 w-full rounded-xl bg-slate-800 object-cover" src={resolveProductImage(item)} alt={item.name} loading="lazy" />
                   </Link>
                   <h5 className="mb-1 mt-3 text-base font-semibold text-white">{item.name}</h5>
                   <p className="my-1 text-sm text-slate-400">{item.brand}</p>

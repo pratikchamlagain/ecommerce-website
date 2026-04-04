@@ -1,12 +1,28 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageShell from "../components/common/PageShell";
 import CheckoutProgress from "../components/common/CheckoutProgress";
 import { fetchCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
+import { placeOrder } from "../lib/ordersApi";
 
 export default function CheckoutPage() {
   const token = getAccessToken();
+  const queryClient = useQueryClient();
+  const [submitError, setSubmitError] = useState("");
+  const [placedOrder, setPlacedOrder] = useState(null);
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    postalCode: "",
+    notes: "",
+    paymentMethod: "COD"
+  });
 
   const cartQuery = useQuery({
     queryKey: ["cart", "checkout"],
@@ -14,7 +30,37 @@ export default function CheckoutPage() {
     enabled: Boolean(token)
   });
 
+  const placeOrderMutation = useMutation({
+    mutationFn: placeOrder,
+    onSuccess: (order) => {
+      setPlacedOrder(order);
+      setSubmitError("");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart", "checkout"] });
+    },
+    onError: (error) => {
+      setSubmitError(error?.response?.data?.message || "Could not place order");
+    }
+  });
+
   const cart = cartQuery.data;
+
+  function onChange(event) {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function onSubmit(event) {
+    event.preventDefault();
+    setSubmitError("");
+
+    if (!cart || cart.items.length === 0) {
+      setSubmitError("Your cart is empty");
+      return;
+    }
+
+    placeOrderMutation.mutate(form);
+  }
 
   return (
     <PageShell title="Checkout">
@@ -22,32 +68,69 @@ export default function CheckoutPage() {
 
       {!token ? (
         <section className="wm-panel mb-4">
-          <p className="m-0 text-slate-300">Please sign in to continue checkout.</p>
+          <p className="m-0 text-slate-700">Please sign in to continue checkout.</p>
           <Link className="wm-btn-primary mt-3 inline-flex" to="/login">Go to Login</Link>
         </section>
       ) : null}
 
-      <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
-        <article className="wm-panel p-5">
-          <h3 className="m-0 text-xl font-semibold text-white">Shipping & Contact</h3>
-          <p className="mb-0 mt-2 text-sm text-slate-300">
-            Address form, contact details, and delivery options are the next milestone in this flow.
+      {placedOrder ? (
+        <section className="wm-panel mb-5 border-emerald-400/40 bg-emerald-50">
+          <h3 className="m-0 text-2xl text-emerald-800">Order Confirmed</h3>
+          <p className="mb-0 mt-2 text-sm text-emerald-900">
+            Order ID: <strong>{placedOrder.id}</strong>. Your payment method is <strong>{placedOrder.paymentMethod}</strong>.
           </p>
-        </article>
+          <p className="mb-0 mt-1 text-sm text-emerald-900">
+            Total paid: <strong>Rs. {Number(placedOrder.totalAmount).toFixed(2)}</strong>
+          </p>
+          <Link className="wm-btn-secondary mt-3 inline-flex" to="/products?page=1">Continue Shopping</Link>
+        </section>
+      ) : null}
+
+      <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
+        <form className="wm-panel p-5" onSubmit={onSubmit}>
+          <h3 className="m-0 text-xl text-slate-900">Shipping & Contact</h3>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <input className="wm-input" name="fullName" placeholder="Full name" value={form.fullName} onChange={onChange} required />
+            <input className="wm-input" name="email" placeholder="Email" type="email" value={form.email} onChange={onChange} required />
+            <input className="wm-input" name="phone" placeholder="Phone" value={form.phone} onChange={onChange} required />
+            <input className="wm-input" name="city" placeholder="City" value={form.city} onChange={onChange} required />
+            <input className="wm-input sm:col-span-2" name="addressLine1" placeholder="Address line 1" value={form.addressLine1} onChange={onChange} required />
+            <input className="wm-input sm:col-span-2" name="addressLine2" placeholder="Address line 2 (optional)" value={form.addressLine2} onChange={onChange} />
+            <input className="wm-input" name="postalCode" placeholder="Postal code" value={form.postalCode} onChange={onChange} required />
+            <select className="wm-input" name="paymentMethod" value={form.paymentMethod} onChange={onChange}>
+              <option value="COD">Cash On Delivery</option>
+              <option value="CARD">Card Payment</option>
+              <option value="BANK_TRANSFER">Bank Transfer</option>
+            </select>
+            <textarea className="wm-input sm:col-span-2" name="notes" placeholder="Order note (optional)" rows={3} value={form.notes} onChange={onChange} />
+          </div>
+
+          {submitError ? <p className="mb-0 mt-3 text-sm text-rose-700">{submitError}</p> : null}
+
+          <button
+            className="wm-btn-primary mt-4"
+            type="submit"
+            disabled={!token || !cart || cart.items.length === 0 || placeOrderMutation.isPending || Boolean(placedOrder)}
+          >
+            {placeOrderMutation.isPending ? "Placing Order..." : "Place Order"}
+          </button>
+        </form>
+
         <article className="wm-card p-5">
-          <h3 className="m-0 text-xl font-semibold text-white">Order Preview</h3>
-          {cartQuery.isPending ? <p className="mt-2 text-sm text-slate-300">Loading cart summary...</p> : null}
-          {cartQuery.isError ? <p className="mt-2 text-sm text-rose-300">Could not load checkout summary.</p> : null}
+          <h3 className="m-0 text-xl text-slate-900">Order Preview</h3>
+          {cartQuery.isPending ? <p className="mt-2 text-sm text-slate-600">Loading cart summary...</p> : null}
+          {cartQuery.isError ? <p className="mt-2 text-sm text-rose-600">Could not load checkout summary.</p> : null}
 
           {cart ? (
-            <div className="mt-3 grid gap-2 text-sm text-slate-300">
+            <div className="mt-3 grid gap-2 text-sm text-slate-700">
               <p className="m-0"><strong>Items:</strong> {cart.totals.totalItems}</p>
               <p className="m-0"><strong>Subtotal:</strong> <span className="wm-price">Rs. {cart.totals.totalAmount.toFixed(2)}</span></p>
               <p className="m-0"><strong>Shipping:</strong> Rs. 0.00</p>
               <p className="m-0 text-base font-semibold"><strong>Total:</strong> <span className="wm-price">Rs. {cart.totals.totalAmount.toFixed(2)}</span></p>
             </div>
           ) : (
-            <ul className="mb-0 mt-2 grid gap-2 text-sm text-slate-300">
+            <ul className="mb-0 mt-2 grid gap-2 text-sm text-slate-600">
               <li>Subtotal and shipping breakdown</li>
               <li>Payment method selection</li>
               <li>Order placement confirmation</li>
@@ -55,10 +138,6 @@ export default function CheckoutPage() {
           )}
         </article>
       </section>
-
-      <button className="wm-btn-primary mt-5" type="button" disabled={!token || !cart || cart.items.length === 0}>
-        Continue To Payment
-      </button>
     </PageShell>
   );
 }

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../lib/productsApi";
+import { getBrandLegacyImage, getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -84,6 +85,16 @@ export default function ProductsPage() {
   function onSearchSubmit(event) {
     event.preventDefault();
     applyFilters({ page: 1, search, category, sortBy, sortOrder });
+  }
+
+  function resolveProductImage(product) {
+    const fromApi = product?.imageUrl;
+
+    if (typeof fromApi === "string" && fromApi.trim()) {
+      return fromApi;
+    }
+
+    return getBrandLegacyImage(product?.brand) || getCategoryLegacyImage(product?.category?.slug);
   }
 
   return (
@@ -183,7 +194,12 @@ export default function ProductsPage() {
         {products.map((product) => (
           <article className="wm-card overflow-hidden p-3 shadow-xl shadow-black/20" key={product.id}>
             <Link to={`/products/${product.slug}`}>
-              <img className="h-48 w-full rounded-xl bg-slate-800 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
+              <img
+                className="h-48 w-full rounded-xl bg-slate-800 object-cover"
+                src={resolveProductImage(product)}
+                alt={product.name}
+                loading="lazy"
+              />
             </Link>
             <h3 className="mb-1 mt-3 text-base font-semibold text-white">
               <Link className="hover:underline" to={`/products/${product.slug}`}>{product.name}</Link>

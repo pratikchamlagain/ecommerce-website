@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRouter from "./modules/auth/auth.routes.js";
 import productsRouter from "./modules/products/products.routes.js";
 import cartRouter from "./modules/cart/cart.routes.js";
+import ordersRouter from "./modules/orders/orders.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.get("/api/v1/health", (_req, res) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/products", productsRouter);
 app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/orders", ordersRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ ok: false, message: "Route not found" });

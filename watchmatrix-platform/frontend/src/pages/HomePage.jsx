@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { fetchProducts } from "../lib/productsApi";
 import { addToCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
-import { getCategoryLegacyImage } from "../lib/legacyImageMap";
+import { categoryLegacyGalleryMap, getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function HomePage() {
   const token = getAccessToken();
@@ -128,6 +128,40 @@ export default function HomePage() {
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-2xl border border-black/15 bg-white p-4">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h4 className="m-0 text-2xl text-slate-900">Category Visual Gallery</h4>
+          <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Recovered from legacy build</span>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {categories.map((category) => (
+            <article className="wm-card p-3" key={`gallery-${category.slug}`}>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="m-0 text-lg font-semibold text-slate-900">{category.label}</p>
+                <Link className="text-sm font-semibold text-slate-700 hover:underline" to={`/products?category=${category.slug}&page=1`}>
+                  Browse
+                </Link>
+              </div>
+
+              <div className="overflow-x-auto pb-2">
+                <div className="flex min-w-max gap-3">
+                  {(categoryLegacyGalleryMap[category.slug] || [getCategoryLegacyImage(category.slug)]).map((image, index) => (
+                    <img
+                      className="h-28 w-40 rounded-xl object-cover"
+                      key={`${category.slug}-${index}`}
+                      src={image}
+                      alt={`${category.label} watch ${index + 1}`}
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
