@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 export default function PageShell({ title, children }) {
   const themes = [
     { id: "luxury-gold", label: "Luxury Gold" },
     { id: "ocean-steel", label: "Ocean Steel" },
     { id: "graphite-red", label: "Graphite Red" }
+  ];
+
+  const quickLinks = [
+    { to: "/about", label: "Contact Us" },
+    { to: "/products?category=luxury&page=1", label: "Luxury Watches" },
+    { to: "/checkout", label: "Sell My Watch" }
   ];
 
   const navItems = [
@@ -33,35 +39,27 @@ export default function PageShell({ title, children }) {
   }, [theme]);
 
   return (
-    <div
-      className="min-h-screen text-slate-100"
-      style={{
-        backgroundImage: "linear-gradient(to bottom, var(--wm-bg-from), var(--wm-bg-via), var(--wm-bg-to))"
-      }}
-    >
-      <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex w-[min(1200px,94%)] flex-wrap items-center justify-between gap-4 py-4">
-          <Link className="group inline-flex items-center gap-3" to="/">
-            <span
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm font-bold"
-              style={{
-                borderColor: "var(--wm-accent-border)",
-                backgroundColor: "var(--wm-accent-soft)",
-                color: "var(--wm-accent)"
-              }}
-            >
-              WM
-            </span>
-            <div>
-              <p className="m-0 text-xs uppercase tracking-[0.2em]" style={{ color: "var(--wm-accent)" }}>WatchMatrix</p>
-              <p className="m-0 text-sm text-slate-300 group-hover:text-white">Premium Timepieces</p>
-            </div>
-          </Link>
+    <div className="min-h-screen bg-[#f2f2f2] text-slate-900">
+      <header className="border-b border-black/10 bg-black text-white">
+        <p className="m-0 py-2 text-center text-sm font-medium tracking-wide">100% Certified Authentic</p>
+      </header>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="text-xs uppercase tracking-[0.14em] text-slate-400" htmlFor="theme-select">Theme</label>
+      <div className="border-b border-black/10 bg-white">
+        <div className="mx-auto flex w-[min(1320px,95%)] flex-wrap items-center justify-between gap-3 py-3">
+          <nav className="flex flex-wrap items-center gap-4 text-sm text-slate-700">
+            {quickLinks.map((item) => (
+              <Link className="hover:text-black" key={item.to} to={item.to}>{item.label}</Link>
+            ))}
+          </nav>
+
+          <Link className="text-5xl font-black tracking-[0.08em] text-black" to="/">WM</Link>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <input className="wm-input w-[220px] rounded-full" placeholder="Search watches" type="search" />
+            <Link className="wm-icon-btn" to="/cart">Bag</Link>
+            <Link className="wm-icon-btn" to="/profile">Account</Link>
             <select
-              className="wm-input rounded-full px-3 py-1.5 text-sm"
+              className="wm-input rounded-full px-3 py-2 text-xs"
               id="theme-select"
               value={theme}
               onChange={(event) => setTheme(event.target.value)}
@@ -71,34 +69,57 @@ export default function PageShell({ title, children }) {
               ))}
             </select>
           </div>
-
-          <nav className="flex flex-wrap gap-2 text-sm">
-            {navItems.map((item) => (
-              <Link
-                className="wm-nav-link"
-                key={item.to}
-                to={item.to}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
         </div>
-      </header>
+      </div>
 
-      <main className="relative isolate pb-10 pt-8">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 mx-auto h-[22rem] w-[min(1100px,92%)] rounded-full blur-3xl"
-          style={{ background: "var(--wm-highlight)" }}
-        />
-        <section className="mx-auto w-[min(1200px,94%)] rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/30 md:p-8">
-          <h2 className="mt-0 text-2xl font-semibold tracking-tight text-white md:text-3xl">{title}</h2>
-          <div className="mt-5 text-slate-200">{children}</div>
+      <div className="border-b border-black/10 bg-white">
+        <nav className="mx-auto flex w-[min(1320px,95%)] flex-wrap gap-2 py-2 text-sm">
+          {navItems.map((item) => (
+            <NavLink
+              className={({ isActive }) => (isActive ? "wm-nav-link wm-nav-link-active" : "wm-nav-link")}
+              key={item.to}
+              to={item.to}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+
+      <main className="pb-12 pt-6">
+        <section className="mx-auto w-[min(1320px,95%)]">
+          <h2 className="wm-page-title">{title}</h2>
+          <div className="mt-4">{children}</div>
         </section>
       </main>
 
-      <footer className="mx-auto w-[min(1200px,94%)] border-t border-white/10 py-6 text-xs text-slate-400">
-        Curated watches for work, adventure, and legacy moments.
+      <footer className="bg-[#2f3238] py-10 text-slate-100">
+        <div className="mx-auto grid w-[min(1320px,95%)] gap-6 text-sm md:grid-cols-4">
+          <div>
+            <p className="mb-2 text-lg font-semibold">WatchMatrix HQ</p>
+            <p className="m-0">Kathmandu, Nepal</p>
+            <p className="m-0">Mon-Sat, 9AM - 6PM</p>
+          </div>
+          <div>
+            <p className="mb-2 text-lg font-semibold">Buying & Selling</p>
+            <p className="m-0">Buy Premium Watches</p>
+            <p className="m-0">Sell Your Watch</p>
+            <p className="m-0">Authenticity Protection</p>
+          </div>
+          <div>
+            <p className="mb-2 text-lg font-semibold">Support</p>
+            <p className="m-0">Contact Us</p>
+            <p className="m-0">FAQ</p>
+            <p className="m-0">Returns</p>
+          </div>
+          <div>
+            <p className="mb-2 text-lg font-semibold">Newsletter</p>
+            <div className="flex gap-2">
+              <input className="wm-input h-10 flex-1 border-white/20 bg-white/10 text-white placeholder:text-slate-300" placeholder="Your email" type="email" />
+              <button className="wm-btn-primary h-10 rounded-full px-4" type="button">Join</button>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
