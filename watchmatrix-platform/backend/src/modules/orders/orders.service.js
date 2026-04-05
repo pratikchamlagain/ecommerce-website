@@ -111,3 +111,37 @@ export async function createOrder(userId, payload) {
 
   return toPublicOrder(order);
 }
+
+export async function listOrdersByUser(userId) {
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    include: {
+      items: true
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+
+  return orders.map(toPublicOrder);
+}
+
+export async function getOrderByIdForUser(userId, orderId) {
+  const order = await prisma.order.findFirst({
+    where: {
+      id: orderId,
+      userId
+    },
+    include: {
+      items: true
+    }
+  });
+
+  if (!order) {
+    const err = new Error("Order not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  return toPublicOrder(order);
+}

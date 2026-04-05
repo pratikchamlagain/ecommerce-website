@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageShell from "../components/common/PageShell";
 import CheckoutProgress from "../components/common/CheckoutProgress";
@@ -8,10 +8,10 @@ import { getAccessToken } from "../lib/authStorage";
 import { placeOrder } from "../lib/ordersApi";
 
 export default function CheckoutPage() {
+  const navigate = useNavigate();
   const token = getAccessToken();
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState("");
-  const [placedOrder, setPlacedOrder] = useState(null);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -33,10 +33,10 @@ export default function CheckoutPage() {
   const placeOrderMutation = useMutation({
     mutationFn: placeOrder,
     onSuccess: (order) => {
-      setPlacedOrder(order);
       setSubmitError("");
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart", "checkout"] });
+      navigate("/order-success", { state: { order } });
     },
     onError: (error) => {
       setSubmitError(error?.response?.data?.message || "Could not place order");
@@ -73,19 +73,6 @@ export default function CheckoutPage() {
         </section>
       ) : null}
 
-      {placedOrder ? (
-        <section className="wm-panel mb-5 border-emerald-400/40 bg-emerald-50">
-          <h3 className="m-0 text-2xl text-emerald-800">Order Confirmed</h3>
-          <p className="mb-0 mt-2 text-sm text-emerald-900">
-            Order ID: <strong>{placedOrder.id}</strong>. Your payment method is <strong>{placedOrder.paymentMethod}</strong>.
-          </p>
-          <p className="mb-0 mt-1 text-sm text-emerald-900">
-            Total paid: <strong>Rs. {Number(placedOrder.totalAmount).toFixed(2)}</strong>
-          </p>
-          <Link className="wm-btn-secondary mt-3 inline-flex" to="/products?page=1">Continue Shopping</Link>
-        </section>
-      ) : null}
-
       <section className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
         <form className="wm-panel p-5" onSubmit={onSubmit}>
           <h3 className="m-0 text-xl text-slate-900">Shipping & Contact</h3>
@@ -111,7 +98,7 @@ export default function CheckoutPage() {
           <button
             className="wm-btn-primary mt-4"
             type="submit"
-            disabled={!token || !cart || cart.items.length === 0 || placeOrderMutation.isPending || Boolean(placedOrder)}
+            disabled={!token || !cart || cart.items.length === 0 || placeOrderMutation.isPending}
           >
             {placeOrderMutation.isPending ? "Placing Order..." : "Place Order"}
           </button>

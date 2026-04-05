@@ -1,12 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import { fetchMe } from "../lib/authApi";
 import { clearAccessToken } from "../lib/authStorage";
+import { fetchMyOrders } from "../lib/ordersApi";
 
 export default function ProfilePage() {
   const profileQuery = useQuery({
     queryKey: ["me"],
     queryFn: fetchMe
+  });
+
+  const ordersQuery = useQuery({
+    queryKey: ["my-orders"],
+    queryFn: fetchMyOrders
   });
 
   function onLogout() {
@@ -20,11 +27,44 @@ export default function ProfilePage() {
       {profileQuery.isError ? <p className="text-rose-300">Unable to load profile. Please sign in again.</p> : null}
 
       {profileQuery.data ? (
-        <div className="wm-card max-w-[460px] p-5">
-          <p className="text-slate-200"><strong>Name:</strong> {profileQuery.data.fullName}</p>
-          <p className="text-slate-200"><strong>Email:</strong> {profileQuery.data.email}</p>
-          <button className="wm-btn-secondary rounded-full px-4" type="button" onClick={onLogout}>Logout</button>
-        </div>
+        <>
+          <div className="wm-card max-w-[460px] p-5">
+            <p className="text-slate-700"><strong>Name:</strong> {profileQuery.data.fullName}</p>
+            <p className="text-slate-700"><strong>Email:</strong> {profileQuery.data.email}</p>
+            <button className="wm-btn-secondary rounded-full px-4" type="button" onClick={onLogout}>Logout</button>
+          </div>
+
+          <section className="mt-6">
+            <h3 className="m-0 text-2xl text-slate-900">My Orders</h3>
+            {ordersQuery.isPending ? <p className="wm-muted mt-2">Loading orders...</p> : null}
+            {ordersQuery.isError ? <p className="mt-2 text-sm text-rose-600">Could not load your orders.</p> : null}
+
+            {!ordersQuery.isPending && !ordersQuery.isError && (ordersQuery.data || []).length === 0 ? (
+              <p className="wm-muted mt-2">You have not placed any orders yet.</p>
+            ) : null}
+
+            <div className="mt-3 grid gap-3">
+              {(ordersQuery.data || []).map((order) => (
+                <article className="wm-card p-4" key={order.id}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="m-0 font-semibold text-slate-900">Order #{order.id}</p>
+                      <p className="m-0 text-sm text-slate-600">
+                        {new Date(order.createdAt).toLocaleString()} | {order.paymentMethod} | {order.status}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <p className="m-0 text-sm font-semibold text-slate-900">Rs. {Number(order.totalAmount).toFixed(2)}</p>
+                      <Link className="wm-btn-secondary" to={`/orders/${order.id}`}>
+                        View Details
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
       ) : null}
     </PageShell>
   );

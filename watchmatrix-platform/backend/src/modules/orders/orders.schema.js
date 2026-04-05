@@ -11,3 +11,7 @@ export const createOrderSchema = z.object({
   notes: z.string().trim().max(500).optional(),
   paymentMethod: z.enum(["COD", "CARD", "BANK_TRANSFER"])
 });
+
+export const orderParamsSchema = z.object({
+  orderId: z.string().min(1)
+});
