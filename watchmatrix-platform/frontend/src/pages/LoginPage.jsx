@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import { loginUser } from "../lib/authApi";
-import { setAccessToken } from "../lib/authStorage";
+import { setAccessToken, setAuthUser } from "../lib/authStorage";
+import { getRoleHomePath } from "../lib/authRole";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -11,7 +12,8 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const targetPath = location.state?.from?.pathname || "/profile";
+  const fallbackPath = "/profile";
+  const targetPath = location.state?.from?.pathname;
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -21,7 +23,8 @@ export default function LoginPage() {
     try {
       const result = await loginUser(form);
       setAccessToken(result.accessToken);
-      navigate(targetPath, { replace: true });
+      setAuthUser(result.user);
+      navigate(targetPath || getRoleHomePath(result.user?.role) || fallbackPath, { replace: true });
     } catch (submitError) {
       setError(submitError?.response?.data?.message || "Login failed");
     } finally {

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { fetchProducts } from "../lib/productsApi";
 import { addToCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
-import { categoryLegacyGalleryMap, getCategoryLegacyImage } from "../lib/legacyImageMap";
+import { categoryLegacyGalleryMap, getBrandLegacyImage, getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function HomePage() {
   const token = getAccessToken();
@@ -67,6 +67,23 @@ export default function HomePage() {
     return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
   }
 
+  function onProductImageError(event, product) {
+    const element = event.currentTarget;
+
+    if (element.dataset.fallbackApplied === "1") {
+      return;
+    }
+
+    const fallback = getBrandLegacyImage(product?.brand) || getCategoryLegacyImage(product?.category?.slug);
+
+    if (!fallback) {
+      return;
+    }
+
+    element.dataset.fallbackApplied = "1";
+    element.src = fallback;
+  }
+
   return (
     <PageShell title="Crafted For Every Moment">
       <section className="relative overflow-hidden rounded-3xl border border-black/20 bg-slate-900 text-white">
@@ -120,7 +137,13 @@ export default function HomePage() {
 
             return (
               <article className="wm-card p-3" key={`flash-${product.id}`}>
-                <img className="h-44 w-full rounded-xl object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
+                <img
+                  className="h-44 w-full rounded-xl object-cover"
+                  src={product.imageUrl}
+                  alt={product.name}
+                  loading="lazy"
+                  onError={(event) => onProductImageError(event, product)}
+                />
                 <p className="mb-1 mt-3 text-sm text-slate-500">{product.brand}</p>
                 <h5 className="m-0 text-base font-semibold text-slate-900">{product.name}</h5>
                 <p className="mt-2 text-lg font-bold text-rose-700">Rs. {offerPrice.toFixed(2)}</p>
@@ -200,7 +223,13 @@ export default function HomePage() {
                   {group.products.map((product) => (
                     <div className="wm-card p-3" key={product.id}>
                       <Link to={`/products/${product.slug}`}>
-                        <img className="h-40 w-full rounded-xl bg-slate-800 object-cover" src={product.imageUrl} alt={product.name} loading="lazy" />
+                        <img
+                          className="h-40 w-full rounded-xl bg-slate-800 object-cover"
+                          src={product.imageUrl}
+                          alt={product.name}
+                          loading="lazy"
+                          onError={(event) => onProductImageError(event, product)}
+                        />
                       </Link>
                       <h5 className="mb-1 mt-3 text-base font-semibold text-slate-900">{product.name}</h5>
                       <p className="my-1 text-sm text-slate-500">{product.brand}</p>

@@ -17,11 +17,19 @@ model User {
   fullName     String
   email        String   @unique
   passwordHash String
+  role         UserRole @default(CUSTOMER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   cart         Cart?
   orders       Order[]
+  sellerProducts Product[]
+}
+
+enum UserRole {
+  CUSTOMER
+  SELLER
+  ADMIN
 }
 
 model Category {
@@ -43,10 +51,12 @@ model Product {
   stock       Int        @default(0)
   imageUrl    String
   categoryId  String
+  sellerId    String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
   category    Category   @relation(fields: [categoryId], references: [id])
+  seller      User?      @relation(fields: [sellerId], references: [id])
   cartItems   CartItem[]
   orderItems  OrderItem[]
 }

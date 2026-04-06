@@ -35,6 +35,23 @@ export default function ProductDetailPage() {
     return getBrandLegacyImage(item?.brand) || getCategoryLegacyImage(item?.category?.slug);
   }
 
+  function onProductImageError(event, item) {
+    const element = event.currentTarget;
+
+    if (element.dataset.fallbackApplied === "1") {
+      return;
+    }
+
+    const fallback = getBrandLegacyImage(item?.brand) || getCategoryLegacyImage(item?.category?.slug);
+
+    if (!fallback) {
+      return;
+    }
+
+    element.dataset.fallbackApplied = "1";
+    element.src = fallback;
+  }
+
   const galleryImages = useMemo(() => {
     const sourceImage = resolveProductImage(product);
 
@@ -85,7 +102,12 @@ export default function ProductDetailPage() {
         <>
         <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr]">
           <article className="wm-card p-4">
-            <img className="h-[380px] w-full rounded-2xl bg-slate-800 object-cover" src={activeImage} alt={product.name} />
+            <img
+              className="h-[380px] w-full rounded-2xl bg-slate-800 object-cover"
+              src={activeImage}
+              alt={product.name}
+              onError={(event) => onProductImageError(event, product)}
+            />
 
             {galleryImages.length > 1 ? (
               <div className="mt-3 grid grid-cols-4 gap-2">
@@ -153,7 +175,13 @@ export default function ProductDetailPage() {
               {relatedProducts.map((item) => (
                 <article className="wm-card p-3" key={item.id}>
                   <Link to={`/products/${item.slug}`}>
-                    <img className="h-40 w-full rounded-xl bg-slate-800 object-cover" src={resolveProductImage(item)} alt={item.name} loading="lazy" />
+                    <img
+                      className="h-40 w-full rounded-xl bg-slate-800 object-cover"
+                      src={resolveProductImage(item)}
+                      alt={item.name}
+                      loading="lazy"
+                      onError={(event) => onProductImageError(event, item)}
+                    />
                   </Link>
                   <h5 className="mb-1 mt-3 text-base font-semibold text-white">{item.name}</h5>
                   <p className="my-1 text-sm text-slate-400">{item.brand}</p>

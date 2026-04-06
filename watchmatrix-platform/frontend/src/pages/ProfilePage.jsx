@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import { fetchMe } from "../lib/authApi";
-import { clearAccessToken } from "../lib/authStorage";
+import { clearAuthSession } from "../lib/authStorage";
 import { fetchMyOrders } from "../lib/ordersApi";
 
 export default function ProfilePage() {
@@ -17,7 +17,7 @@ export default function ProfilePage() {
   });
 
   function onLogout() {
-    clearAccessToken();
+    clearAuthSession();
     window.location.href = "/login";
   }
 
@@ -31,6 +31,7 @@ export default function ProfilePage() {
           <div className="wm-card max-w-[460px] p-5">
             <p className="text-slate-700"><strong>Name:</strong> {profileQuery.data.fullName}</p>
             <p className="text-slate-700"><strong>Email:</strong> {profileQuery.data.email}</p>
+            <p className="text-slate-700"><strong>Role:</strong> {profileQuery.data.role}</p>
             <button className="wm-btn-secondary rounded-full px-4" type="button" onClick={onLogout}>Logout</button>
           </div>
 

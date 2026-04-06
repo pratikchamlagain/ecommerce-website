@@ -6,6 +6,8 @@ import CartPage from "../pages/CartPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderSuccessPage from "../pages/OrderSuccessPage";
 import OrderDetailPage from "../pages/OrderDetailPage";
+import SellerDashboardPage from "../pages/SellerDashboardPage";
+import AdminDashboardPage from "../pages/AdminDashboardPage";
 import AboutPage from "../pages/AboutPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import LoginPage from "../pages/LoginPage";
@@ -20,6 +22,22 @@ export const router = createBrowserRouter([
   { path: "/cart", element: <CartPage /> },
   { path: "/checkout", element: <CheckoutPage /> },
   { path: "/order-success", element: <OrderSuccessPage /> },
+  {
+    path: "/seller",
+    element: (
+      <RequireAuth allowedRoles={["SELLER"]}>
+        <SellerDashboardPage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/admin",
+    element: (
+      <RequireAuth allowedRoles={["ADMIN"]}>
+        <AdminDashboardPage />
+      </RequireAuth>
+    )
+  },
   {
     path: "/orders/:orderId",
     element: (

@@ -97,6 +97,23 @@ export default function ProductsPage() {
     return getBrandLegacyImage(product?.brand) || getCategoryLegacyImage(product?.category?.slug);
   }
 
+  function onProductImageError(event, product) {
+    const element = event.currentTarget;
+
+    if (element.dataset.fallbackApplied === "1") {
+      return;
+    }
+
+    const fallback = getBrandLegacyImage(product?.brand) || getCategoryLegacyImage(product?.category?.slug);
+
+    if (!fallback) {
+      return;
+    }
+
+    element.dataset.fallbackApplied = "1";
+    element.src = fallback;
+  }
+
   return (
     <PageShell title="Explore Collection">
       <section className="wm-panel mb-4 flex flex-wrap items-center gap-2">
@@ -199,6 +216,7 @@ export default function ProductsPage() {
                 src={resolveProductImage(product)}
                 alt={product.name}
                 loading="lazy"
+                onError={(event) => onProductImageError(event, product)}
               />
             </Link>
             <h3 className="mb-1 mt-3 text-base font-semibold text-white">

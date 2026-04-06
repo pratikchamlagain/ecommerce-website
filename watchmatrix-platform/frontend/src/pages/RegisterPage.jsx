@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import { registerUser } from "../lib/authApi";
-import { setAccessToken } from "../lib/authStorage";
+import { setAccessToken, setAuthUser } from "../lib/authStorage";
+import { getRoleHomePath } from "../lib/authRole";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ fullName: "", email: "", password: "" });
+  const [form, setForm] = useState({ fullName: "", email: "", password: "", role: "CUSTOMER" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -18,7 +19,8 @@ export default function RegisterPage() {
     try {
       const result = await registerUser(form);
       setAccessToken(result.accessToken);
-      navigate("/profile", { replace: true });
+      setAuthUser(result.user);
+      navigate(getRoleHomePath(result.user?.role), { replace: true });
     } catch (submitError) {
       setError(submitError?.response?.data?.message || "Registration failed");
     } finally {
@@ -59,6 +61,17 @@ export default function RegisterPage() {
           minLength={6}
           required
         />
+
+        <label className="text-sm font-medium text-slate-200" htmlFor="role">Account Type</label>
+        <select
+          className="wm-input"
+          id="role"
+          value={form.role}
+          onChange={(event) => setForm((prev) => ({ ...prev, role: event.target.value }))}
+        >
+          <option value="CUSTOMER">Customer</option>
+          <option value="SELLER">Seller</option>
+        </select>
 
         {error ? <p className="m-0 text-sm text-rose-300">{error}</p> : null}
 

@@ -4,7 +4,7 @@ import prisma from "../../config/prisma.js";
 
 function buildAuthResponse(user) {
   const accessToken = jwt.sign(
-    { sub: user.id, email: user.email },
+    { sub: user.id, email: user.email, role: user.role },
     process.env.JWT_ACCESS_SECRET,
     { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m" }
   );
@@ -15,7 +15,7 @@ function buildAuthResponse(user) {
   };
 }
 
-export async function registerUser({ fullName, email, password }) {
+export async function registerUser({ fullName, email, password, role }) {
   const existing = await prisma.user.findUnique({ where: { email } });
 
   if (existing) {
@@ -31,6 +31,7 @@ export async function registerUser({ fullName, email, password }) {
       fullName,
       email,
       passwordHash,
+      role,
       cart: {
         create: {}
       }
@@ -39,6 +40,7 @@ export async function registerUser({ fullName, email, password }) {
       id: true,
       fullName: true,
       email: true,
+      role: true,
       createdAt: true,
       updatedAt: true
     }
@@ -54,6 +56,7 @@ export async function loginUser({ email, password }) {
       id: true,
       fullName: true,
       email: true,
+      role: true,
       passwordHash: true,
       createdAt: true,
       updatedAt: true
@@ -78,6 +81,7 @@ export async function loginUser({ email, password }) {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
+    role: user.role,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
   };
@@ -92,6 +96,7 @@ export async function getCurrentUser(userId) {
       id: true,
       fullName: true,
       email: true,
+      role: true,
       createdAt: true,
       updatedAt: true
     }

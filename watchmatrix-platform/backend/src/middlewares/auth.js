@@ -16,3 +16,15 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ ok: false, message: "Invalid or expired token" });
   }
 }
+
+export function requireRoles(...allowedRoles) {
+  return function roleGuard(req, res, next) {
+    const userRole = req.user?.role;
+
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      return res.status(403).json({ ok: false, message: "Forbidden" });
+    }
+
+    return next();
+  };
+}
