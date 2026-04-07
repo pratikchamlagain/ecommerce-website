@@ -73,21 +73,21 @@ export async function listSellersForAdmin(query) {
       where,
       skip,
       take: query.limit,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      fullName: true,
-      email: true,
-      isActive: true,
-      createdAt: true,
-      sellerProducts: {
-        select: {
-          id: true,
-          stock: true,
-          price: true
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        isActive: true,
+        createdAt: true,
+        sellerProducts: {
+          select: {
+            id: true,
+            stock: true,
+            price: true
+          }
         }
       }
-    }
     })
   ]);
 
@@ -117,12 +117,14 @@ export async function listSellersForAdmin(query) {
   };
 }
 
-export async function setSellerActiveStatus(sellerId, isActive) {
+export async function setSellerActiveStatus(adminId, sellerId, isActive) {
   const seller = await prisma.user.findUnique({
     where: { id: sellerId },
     select: {
       id: true,
-      role: true
+      role: true,
+      fullName: true,
+      isActive: true
     }
   });
 
@@ -145,5 +147,64 @@ export async function setSellerActiveStatus(sellerId, isActive) {
     }
   });
 
+  await prisma.adminAuditLog.create({
+    data: {
+      adminId,
+      targetUserId: sellerId,
+      action: "SELLER_STATUS_CHANGED",
+      description: isActive
+        ? `Activated seller ${seller.fullName}`
+        : `Suspended seller ${seller.fullName}`,
+      metadata: {
+        previousIsActive: seller.isActive,
+        nextIsActive: isActive
+      }
+    }
+  });
+
   return updated;
+}
+
+export async function listAdminAuditLogs(query) {
+  const skip = (query.page - 1) * query.limit;
+
+  const [total, logs] = await Promise.all([
+    prisma.adminAuditLog.count(),
+    prisma.adminAuditLog.findMany({
+      skip,
+      take: query.limit,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        action: true,
+        description: true,
+        metadata: true,
+        createdAt: true,
+        admin: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true
+          }
+        },
+        targetUser: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true
+          }
+        }
+      }
+    })
+  ]);
+
+  return {
+    items: logs,
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / query.limit))
+    }
+  };
 }

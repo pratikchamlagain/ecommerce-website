@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../lib/productsApi";
-import { getBrandLegacyImage, getCategoryLegacyImage } from "../lib/legacyImageMap";
+import { getBrandLegacyImage, getCategoryLegacyGallery, getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -81,6 +81,7 @@ export default function ProductsPage() {
 
   const products = productsQuery.data?.items ?? [];
   const pagination = productsQuery.data?.pagination;
+  const selectedCategoryGallery = category ? getCategoryLegacyGallery(category) : [];
 
   function onSearchSubmit(event) {
     event.preventDefault();
@@ -205,6 +206,29 @@ export default function ProductsPage() {
 
       {!productsQuery.isPending && !productsQuery.isError && products.length === 0 ? (
         <p className="wm-panel wm-muted">No products found yet. Add data or adjust filters.</p>
+      ) : null}
+
+      {category && selectedCategoryGallery.length > 0 ? (
+        <section className="wm-panel mb-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="m-0 text-xl text-white">
+              {category[0].toUpperCase() + category.slice(1)} Legacy Collection ({selectedCategoryGallery.length} images)
+            </h3>
+            <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Recovered order from legacy folders</span>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
+            {selectedCategoryGallery.map((image, index) => (
+              <img
+                className="h-28 w-full rounded-xl bg-slate-800 object-cover"
+                key={`${category}-legacy-${index}`}
+                src={image}
+                alt={`${category} legacy watch ${index + 1}`}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </section>
       ) : null}
 
       <section className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">

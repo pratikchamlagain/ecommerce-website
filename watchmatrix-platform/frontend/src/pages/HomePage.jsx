@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { fetchProducts } from "../lib/productsApi";
 import { addToCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
-import { categoryLegacyGalleryMap, getBrandLegacyImage, getCategoryLegacyImage } from "../lib/legacyImageMap";
+import { getBrandLegacyImage, getCategoryLegacyGallery, getCategoryLegacyImage } from "../lib/legacyImageMap";
 
 export default function HomePage() {
   const token = getAccessToken();
@@ -40,7 +40,7 @@ export default function HomePage() {
 
     return categories.map((category) => ({
       ...category,
-      products: source.filter((item) => item.category?.slug === category.slug).slice(0, 2)
+      products: source.filter((item) => item.category?.slug === category.slug).slice(0, 6)
     }));
   }, [categories, productsQuery.data?.items]);
 
@@ -172,7 +172,7 @@ export default function HomePage() {
 
               <div className="overflow-x-auto pb-2">
                 <div className="flex min-w-max gap-3">
-                  {(categoryLegacyGalleryMap[category.slug] || [getCategoryLegacyImage(category.slug)]).map((image, index) => (
+                  {(getCategoryLegacyGallery(category.slug) || [getCategoryLegacyImage(category.slug)]).map((image, index) => (
                     <img
                       className="h-28 w-40 rounded-xl object-cover"
                       key={`${category.slug}-${index}`}
