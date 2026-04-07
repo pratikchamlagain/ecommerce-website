@@ -42,9 +42,37 @@ export async function getAdminOverview() {
   };
 }
 
-export async function listSellersForAdmin() {
-  const sellers = await prisma.user.findMany({
-    where: { role: "SELLER" },
+function buildSellerWhere(query) {
+  const where = { role: "SELLER" };
+
+  if (query.status === "active") {
+    where.isActive = true;
+  }
+
+  if (query.status === "suspended") {
+    where.isActive = false;
+  }
+
+  if (query.search) {
+    where.OR = [
+      { fullName: { contains: query.search, mode: "insensitive" } },
+      { email: { contains: query.search, mode: "insensitive" } }
+    ];
+  }
+
+  return where;
+}
+
+export async function listSellersForAdmin(query) {
+  const where = buildSellerWhere(query);
+  const skip = (query.page - 1) * query.limit;
+
+  const [total, sellers] = await Promise.all([
+    prisma.user.count({ where }),
+    prisma.user.findMany({
+      where,
+      skip,
+      take: query.limit,
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -60,9 +88,10 @@ export async function listSellersForAdmin() {
         }
       }
     }
-  });
+    })
+  ]);
 
-  return sellers.map((seller) => {
+  const items = sellers.map((seller) => {
     const listings = seller.sellerProducts.length;
     const totalStock = seller.sellerProducts.reduce((sum, item) => sum + item.stock, 0);
 
@@ -76,6 +105,16 @@ export async function listSellersForAdmin() {
       totalStock
     };
   });
+
+  return {
+    items,
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / query.limit))
+    }
+  };
 }
 
 export async function setSellerActiveStatus(sellerId, isActive) {

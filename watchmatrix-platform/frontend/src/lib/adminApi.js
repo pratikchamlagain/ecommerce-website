@@ -5,8 +5,8 @@ export async function fetchAdminOverview() {
   return response.data.data;
 }
 
-export async function fetchAdminSellers() {
-  const response = await apiClient.get("/admin/sellers");
+export async function fetchAdminSellers(params = {}) {
+  const response = await apiClient.get("/admin/sellers", { params });
   return response.data.data;
 }
 

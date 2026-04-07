@@ -1,21 +1,34 @@
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageShell from "../components/common/PageShell";
 import { fetchAdminOverview, fetchAdminSellers, updateSellerStatus } from "../lib/adminApi";
 
 export default function AdminDashboardPage() {
   const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(1);
+
+  const sellerQueryParams = useMemo(() => ({
+    search: search.trim() || undefined,
+    status,
+    page,
+    limit: 8
+  }), [page, search, status]);
+
   const overviewQuery = useQuery({
     queryKey: ["admin-overview"],
     queryFn: fetchAdminOverview
   });
 
   const sellersQuery = useQuery({
-    queryKey: ["admin-sellers"],
-    queryFn: fetchAdminSellers
+    queryKey: ["admin-sellers", sellerQueryParams],
+    queryFn: () => fetchAdminSellers(sellerQueryParams)
   });
 
   const overview = overviewQuery.data;
-  const sellers = sellersQuery.data || [];
+  const sellers = sellersQuery.data?.items || [];
+  const sellersPagination = sellersQuery.data?.pagination;
 
   const statusMutation = useMutation({
     mutationFn: ({ sellerId, isActive }) => updateSellerStatus(sellerId, isActive),
@@ -58,6 +71,32 @@ export default function AdminDashboardPage() {
         <h3 className="m-0 text-xl text-slate-900">Seller Intelligence</h3>
         <p className="m-0 mt-1 text-sm text-slate-600">Live sellers with listing and stock summary.</p>
 
+        <div className="mt-4 grid gap-2 md:grid-cols-[1fr_180px]">
+          <input
+            className="wm-input"
+            placeholder="Search by seller name or email"
+            type="text"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+          />
+
+          <select
+            className="wm-input"
+            value={status}
+            onChange={(event) => {
+              setStatus(event.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="all">All Statuses</option>
+            <option value="active">Active Only</option>
+            <option value="suspended">Suspended Only</option>
+          </select>
+        </div>
+
         {sellersQuery.isPending ? <p className="wm-muted mt-3">Loading sellers...</p> : null}
         {sellersQuery.isError ? <p className="mt-3 text-sm text-rose-600">Could not load sellers list.</p> : null}
 
@@ -66,6 +105,7 @@ export default function AdminDashboardPage() {
         ) : null}
 
         {sellers.length > 0 ? (
+          <>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
@@ -109,6 +149,30 @@ export default function AdminDashboardPage() {
               </tbody>
             </table>
           </div>
+          {sellersPagination ? (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <button
+                className="wm-btn-secondary px-4"
+                type="button"
+                disabled={sellersPagination.page <= 1}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              >
+                Previous
+              </button>
+              <p className="m-0 text-sm text-slate-600">
+                Page {sellersPagination.page} of {sellersPagination.totalPages} | Total {sellersPagination.total}
+              </p>
+              <button
+                className="wm-btn-secondary px-4"
+                type="button"
+                disabled={sellersPagination.page >= sellersPagination.totalPages}
+                onClick={() => setPage((prev) => Math.min(sellersPagination.totalPages, prev + 1))}
+              >
+                Next
+              </button>
+            </div>
+          ) : null}
+          </>
         ) : null}
       </section>
 

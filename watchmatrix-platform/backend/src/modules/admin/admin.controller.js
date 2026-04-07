@@ -1,4 +1,4 @@
-import { sellerStatusBodySchema, sellerStatusParamsSchema } from "./admin.schema.js";
+import { listSellersQuerySchema, sellerStatusBodySchema, sellerStatusParamsSchema } from "./admin.schema.js";
 import { getAdminOverview, listSellersForAdmin, setSellerActiveStatus } from "./admin.service.js";
 
 export async function overview(_req, res, next) {
@@ -14,15 +14,24 @@ export async function overview(_req, res, next) {
   }
 }
 
-export async function sellers(_req, res, next) {
+export async function sellers(req, res, next) {
   try {
-    const data = await listSellersForAdmin();
+    const query = listSellersQuerySchema.parse(req.query);
+    const data = await listSellersForAdmin(query);
 
     return res.status(200).json({
       ok: true,
       data
     });
   } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
     return next(error);
   }
 }
