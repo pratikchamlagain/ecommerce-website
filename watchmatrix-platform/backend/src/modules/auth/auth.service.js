@@ -41,6 +41,7 @@ export async function registerUser({ fullName, email, password, role }) {
       fullName: true,
       email: true,
       role: true,
+      isActive: true,
       createdAt: true,
       updatedAt: true
     }
@@ -57,6 +58,7 @@ export async function loginUser({ email, password }) {
       fullName: true,
       email: true,
       role: true,
+      isActive: true,
       passwordHash: true,
       createdAt: true,
       updatedAt: true
@@ -77,11 +79,18 @@ export async function loginUser({ email, password }) {
     throw err;
   }
 
+  if (!user.isActive) {
+    const err = new Error("Account is suspended. Please contact admin.");
+    err.statusCode = 403;
+    throw err;
+  }
+
   const safeUser = {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
     role: user.role,
+    isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
   };
@@ -97,6 +106,7 @@ export async function getCurrentUser(userId) {
       fullName: true,
       email: true,
       role: true,
+      isActive: true,
       createdAt: true,
       updatedAt: true
     }

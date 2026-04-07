@@ -9,6 +9,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
+    "images:recache": "node scripts/recache-product-images.js",
     "test": "echo \"No tests configured yet\""
   },
   "keywords": [],
