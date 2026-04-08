@@ -38,6 +38,26 @@ const allowedSellerStatusTransitions = {
   CANCELLED: []
 };
 
+function deriveOrderStatusFromSellerItems(statuses) {
+  if (statuses.length === 0) {
+    return "PENDING";
+  }
+
+  if (statuses.every((status) => status === "DELIVERED")) {
+    return "COMPLETED";
+  }
+
+  if (statuses.every((status) => status === "CANCELLED")) {
+    return "CANCELLED";
+  }
+
+  if (statuses.some((status) => ["PACKED", "SHIPPED", "DELIVERED"].includes(status))) {
+    return "PROCESSING";
+  }
+
+  return "PENDING";
+}
+
 function withSellerStatusMeta(item) {
   const allowedNextStatuses = allowedSellerStatusTransitions[item.sellerStatus] || [];
 
@@ -318,6 +338,20 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
           }
         }
       }
+    });
+
+    const siblingItems = await tx.orderItem.findMany({
+      where: { orderId: changed.orderId },
+      select: { sellerStatus: true }
+    });
+
+    const nextOrderStatus = deriveOrderStatusFromSellerItems(
+      siblingItems.map((sibling) => sibling.sellerStatus)
+    );
+
+    await tx.order.update({
+      where: { id: changed.orderId },
+      data: { status: nextOrderStatus }
     });
 
     await tx.sellerFulfillmentLog.create({
