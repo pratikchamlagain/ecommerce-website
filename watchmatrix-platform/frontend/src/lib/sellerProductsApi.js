@@ -34,3 +34,8 @@ export async function updateSellerOrderItemStatus(itemId, sellerStatus) {
   const response = await apiClient.patch(`/orders/seller/items/${itemId}/status`, { sellerStatus });
   return response.data.data;
 }
+
+export async function fetchSellerFulfillmentLogs(params = {}) {
+  const response = await apiClient.get("/orders/seller/fulfillment-logs", { params });
+  return response.data.data;
+}

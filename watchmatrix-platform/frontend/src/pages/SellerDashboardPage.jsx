@@ -5,6 +5,7 @@ import {
   createSellerProduct,
   deleteSellerProduct,
   fetchSellerCategories,
+  fetchSellerFulfillmentLogs,
   fetchSellerOrderItems,
   fetchSellerProducts,
   updateSellerOrderItemStatus,
@@ -41,6 +42,11 @@ export default function SellerDashboardPage() {
   const sellerOrdersQuery = useQuery({
     queryKey: ["seller-order-items", orderStatus, orderPage],
     queryFn: () => fetchSellerOrderItems({ page: orderPage, limit: 8, status: orderStatus || undefined })
+  });
+
+  const fulfillmentLogsQuery = useQuery({
+    queryKey: ["seller-fulfillment-logs"],
+    queryFn: () => fetchSellerFulfillmentLogs({ page: 1, limit: 8 })
   });
 
   const createMutation = useMutation({
@@ -82,6 +88,7 @@ export default function SellerDashboardPage() {
     mutationFn: ({ itemId, sellerStatus }) => updateSellerOrderItemStatus(itemId, sellerStatus),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seller-order-items"] });
+      queryClient.invalidateQueries({ queryKey: ["seller-fulfillment-logs"] });
     }
   });
 
@@ -112,6 +119,14 @@ export default function SellerDashboardPage() {
 
   function getDraftStatus(item) {
     return orderStatusDrafts[item.id] || item.sellerStatus || "PENDING";
+  }
+
+  function getSellerStatusBadgeClass(statusValue) {
+    if (statusValue === "DELIVERED") return "rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700";
+    if (statusValue === "SHIPPED") return "rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700";
+    if (statusValue === "PACKED") return "rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700";
+    if (statusValue === "CANCELLED") return "rounded-full bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700";
+    return "rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700";
   }
 
   async function onUpdateSellerItemStatus(item) {
@@ -281,11 +296,9 @@ export default function SellerDashboardPage() {
                             }));
                           }}
                         >
-                          <option value="PENDING">PENDING</option>
-                          <option value="PACKED">PACKED</option>
-                          <option value="SHIPPED">SHIPPED</option>
-                          <option value="DELIVERED">DELIVERED</option>
-                          <option value="CANCELLED">CANCELLED</option>
+                          {Array.from(new Set(item.editableStatuses || [item.sellerStatus])).map((statusValue) => (
+                            <option key={`${item.id}-${statusValue}`} value={statusValue}>{statusValue}</option>
+                          ))}
                         </select>
                         <button
                           className="wm-btn-secondary px-2 py-1 text-xs"
@@ -293,8 +306,11 @@ export default function SellerDashboardPage() {
                           disabled={sellerItemStatusMutation.isPending}
                           onClick={() => onUpdateSellerItemStatus(item)}
                         >
-                          Update
+                          {sellerItemStatusMutation.isPending ? "Saving..." : "Update"}
                         </button>
+                      </div>
+                      <div className="mt-2">
+                        <span className={getSellerStatusBadgeClass(item.sellerStatus)}>{item.sellerStatus}</span>
                       </div>
                     </td>
                     <td className="py-2 pr-3 text-slate-600">{new Date(item.order.createdAt).toLocaleDateString()}</td>
@@ -326,6 +342,43 @@ export default function SellerDashboardPage() {
             >
               Next
             </button>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="wm-card mt-6 p-5">
+        <h3 className="m-0 text-xl text-slate-900">Fulfillment History</h3>
+        <p className="m-0 mt-1 text-sm text-slate-600">Recent status changes for your sold items.</p>
+
+        {fulfillmentLogsQuery.isPending ? <p className="wm-muted mt-4">Loading fulfillment history...</p> : null}
+        {fulfillmentLogsQuery.isError ? <p className="mt-4 text-sm text-rose-600">Unable to load fulfillment history.</p> : null}
+
+        {!fulfillmentLogsQuery.isPending && !fulfillmentLogsQuery.isError && (fulfillmentLogsQuery.data?.items || []).length === 0 ? (
+          <p className="wm-muted mt-4">No fulfillment actions recorded yet.</p>
+        ) : null}
+
+        {(fulfillmentLogsQuery.data?.items || []).length > 0 ? (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[760px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-left text-slate-500">
+                  <th className="py-2 pr-3 font-semibold">Time</th>
+                  <th className="py-2 pr-3 font-semibold">Order</th>
+                  <th className="py-2 pr-3 font-semibold">Product</th>
+                  <th className="py-2 pr-3 font-semibold">Transition</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(fulfillmentLogsQuery.data?.items || []).map((log) => (
+                  <tr className="border-b border-slate-100" key={log.id}>
+                    <td className="py-2 pr-3 text-slate-600">{new Date(log.createdAt).toLocaleString()}</td>
+                    <td className="py-2 pr-3 text-slate-700">#{log.orderId || "-"}</td>
+                    <td className="py-2 pr-3 text-slate-900">{log.productName}</td>
+                    <td className="py-2 pr-3 text-slate-700">{log.previousStatus} {"->"} {log.nextStatus}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : null}
       </section>

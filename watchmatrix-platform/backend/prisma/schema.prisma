@@ -27,6 +27,7 @@ model User {
   sellerProducts Product[]
   adminActionLogs AdminAuditLog[] @relation("AdminActorLogs")
   adminTargetLogs AdminAuditLog[] @relation("AdminTargetLogs")
+  sellerFulfillmentLogs SellerFulfillmentLog[]
 }
 
 enum UserRole {
@@ -120,6 +121,7 @@ model OrderItem {
 
   order        Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product      Product   @relation(fields: [productId], references: [id])
+  fulfillmentLogs SellerFulfillmentLog[]
 }
 
 enum SellerItemStatus {
@@ -141,4 +143,16 @@ model AdminAuditLog {
 
   admin        User     @relation("AdminActorLogs", fields: [adminId], references: [id], onDelete: Cascade)
   targetUser   User?    @relation("AdminTargetLogs", fields: [targetUserId], references: [id], onDelete: SetNull)
+}
+
+model SellerFulfillmentLog {
+  id             String           @id @default(cuid())
+  sellerId       String
+  orderItemId    String
+  previousStatus SellerItemStatus
+  nextStatus     SellerItemStatus
+  createdAt      DateTime         @default(now())
+
+  seller         User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  orderItem      OrderItem        @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 }

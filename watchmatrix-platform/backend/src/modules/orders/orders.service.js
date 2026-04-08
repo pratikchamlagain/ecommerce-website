@@ -38,6 +38,16 @@ const allowedSellerStatusTransitions = {
   CANCELLED: []
 };
 
+function withSellerStatusMeta(item) {
+  const allowedNextStatuses = allowedSellerStatusTransitions[item.sellerStatus] || [];
+
+  return {
+    ...item,
+    allowedNextStatuses,
+    editableStatuses: [item.sellerStatus, ...allowedNextStatuses]
+  };
+}
+
 export async function createOrder(userId, payload) {
   const cart = await prisma.cart.findUnique({
     where: { userId },
@@ -208,7 +218,7 @@ export async function listOrderItemsBySeller(sellerId, query) {
   ]);
 
   return {
-    items: items.map((item) => ({
+    items: items.map((item) => withSellerStatusMeta({
       id: item.id,
       orderId: item.orderId,
       productId: item.productId,
@@ -281,35 +291,48 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
     throw err;
   }
 
-  const updated = await prisma.orderItem.update({
-    where: { id: itemId },
-    data: { sellerStatus },
-    include: {
-      order: {
-        select: {
-          id: true,
-          status: true,
-          paymentMethod: true,
-          fullName: true,
-          email: true,
-          phone: true,
-          city: true,
-          addressLine1: true,
-          postalCode: true,
-          createdAt: true
-        }
-      },
-      product: {
-        select: {
-          id: true,
-          slug: true,
-          imageUrl: true
+  const updated = await prisma.$transaction(async (tx) => {
+    const changed = await tx.orderItem.update({
+      where: { id: itemId },
+      data: { sellerStatus },
+      include: {
+        order: {
+          select: {
+            id: true,
+            status: true,
+            paymentMethod: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            city: true,
+            addressLine1: true,
+            postalCode: true,
+            createdAt: true
+          }
+        },
+        product: {
+          select: {
+            id: true,
+            slug: true,
+            imageUrl: true
+          }
         }
       }
-    }
+    });
+
+    await tx.sellerFulfillmentLog.create({
+      data: {
+        sellerId,
+        orderItemId: itemId,
+        previousStatus: item.sellerStatus,
+        nextStatus: sellerStatus
+      }
+    });
+
+    return changed;
   });
 
-  return {
+  return withSellerStatusMeta({
     id: updated.id,
     orderId: updated.orderId,
     productId: updated.productId,
@@ -334,5 +357,48 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
       createdAt: updated.order.createdAt
     },
     createdAt: updated.createdAt
+  });
+}
+
+export async function listSellerFulfillmentLogs(sellerId, query) {
+  const skip = (query.page - 1) * query.limit;
+
+  const [total, logs] = await Promise.all([
+    prisma.sellerFulfillmentLog.count({ where: { sellerId } }),
+    prisma.sellerFulfillmentLog.findMany({
+      where: { sellerId },
+      skip,
+      take: query.limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        orderItem: {
+          select: {
+            id: true,
+            productName: true,
+            productBrand: true,
+            orderId: true
+          }
+        }
+      }
+    })
+  ]);
+
+  return {
+    items: logs.map((log) => ({
+      id: log.id,
+      orderItemId: log.orderItemId,
+      orderId: log.orderItem?.orderId || null,
+      productName: log.orderItem?.productName || "Unknown Product",
+      productBrand: log.orderItem?.productBrand || "",
+      previousStatus: log.previousStatus,
+      nextStatus: log.nextStatus,
+      createdAt: log.createdAt
+    })),
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / query.limit))
+    }
   };
 }

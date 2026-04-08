@@ -3,6 +3,37 @@ import { useQuery } from "@tanstack/react-query";
 import PageShell from "../components/common/PageShell";
 import { fetchOrderById } from "../lib/ordersApi";
 
+const fulfillmentSteps = ["PENDING", "PACKED", "SHIPPED", "DELIVERED"];
+
+function getStatusChipClass(status) {
+  if (status === "DELIVERED") return "rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700";
+  if (status === "SHIPPED") return "rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700";
+  if (status === "PACKED") return "rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700";
+  if (status === "CANCELLED") return "rounded-full bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700";
+  return "rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700";
+}
+
+function getStepState(currentStatus, step) {
+  if (currentStatus === "CANCELLED") {
+    return "pending";
+  }
+
+  const currentIndex = fulfillmentSteps.indexOf(currentStatus);
+  const stepIndex = fulfillmentSteps.indexOf(step);
+
+  if (stepIndex <= currentIndex) {
+    return "done";
+  }
+
+  return "pending";
+}
+
+function getStepClass(state) {
+  return state === "done"
+    ? "h-2 rounded-full bg-emerald-500"
+    : "h-2 rounded-full bg-slate-200";
+}
+
 export default function OrderDetailPage() {
   const { orderId = "" } = useParams();
 
@@ -49,6 +80,27 @@ export default function OrderDetailPage() {
                     Qty: {item.quantity} x Rs. {Number(item.unitPrice).toFixed(2)}
                   </p>
                   <p className="m-0 text-sm font-semibold text-slate-900">Subtotal: Rs. {Number(item.subtotal).toFixed(2)}</p>
+
+                  <div className="mt-2">
+                    <span className={getStatusChipClass(item.sellerStatus || "PENDING")}>{item.sellerStatus || "PENDING"}</span>
+                  </div>
+
+                  {item.sellerStatus === "CANCELLED" ? (
+                    <p className="m-0 mt-2 text-xs font-semibold text-rose-700">This item was cancelled by seller fulfillment workflow.</p>
+                  ) : (
+                    <div className="mt-3 grid grid-cols-4 gap-2">
+                      {fulfillmentSteps.map((step) => {
+                        const state = getStepState(item.sellerStatus || "PENDING", step);
+
+                        return (
+                          <div key={`${item.id}-${step}`}>
+                            <div className={getStepClass(state)} />
+                            <p className="m-0 mt-1 text-[11px] font-semibold text-slate-600">{step}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

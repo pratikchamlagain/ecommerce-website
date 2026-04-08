@@ -1,6 +1,7 @@
 import {
   createOrderSchema,
   orderParamsSchema,
+  sellerFulfillmentLogsQuerySchema,
   sellerOrderItemParamsSchema,
   sellerOrderItemsQuerySchema,
   sellerOrderItemStatusSchema
@@ -8,6 +9,7 @@ import {
 import {
   createOrder,
   getOrderByIdForUser,
+  listSellerFulfillmentLogs,
   listOrderItemsBySeller,
   listOrdersByUser,
   updateSellerOrderItemStatus
@@ -111,6 +113,32 @@ export async function patchSellerOrderItemStatus(req, res, next) {
     return res.status(200).json({
       ok: true,
       message: "Seller item status updated",
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
+    return next(error);
+  }
+}
+
+export async function listSellerFulfillmentHistory(req, res, next) {
+  try {
+    if (req.user.role !== "SELLER") {
+      return res.status(403).json({ ok: false, message: "Forbidden" });
+    }
+
+    const query = sellerFulfillmentLogsQuerySchema.parse(req.query);
+    const data = await listSellerFulfillmentLogs(req.user.sub, query);
+
+    return res.status(200).json({
+      ok: true,
       data
     });
   } catch (error) {

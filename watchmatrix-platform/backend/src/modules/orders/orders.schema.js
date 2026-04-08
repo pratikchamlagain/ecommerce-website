@@ -29,3 +29,8 @@ export const sellerOrderItemParamsSchema = z.object({
 export const sellerOrderItemStatusSchema = z.object({
   sellerStatus: z.enum(["PENDING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"])
 });
+
+export const sellerFulfillmentLogsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10)
+});
