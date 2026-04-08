@@ -1,5 +1,17 @@
-import { createOrderSchema, orderParamsSchema } from "./orders.schema.js";
-import { createOrder, getOrderByIdForUser, listOrdersByUser } from "./orders.service.js";
+import {
+  createOrderSchema,
+  orderParamsSchema,
+  sellerOrderItemParamsSchema,
+  sellerOrderItemsQuerySchema,
+  sellerOrderItemStatusSchema
+} from "./orders.schema.js";
+import {
+  createOrder,
+  getOrderByIdForUser,
+  listOrderItemsBySeller,
+  listOrdersByUser,
+  updateSellerOrderItemStatus
+} from "./orders.service.js";
 
 export async function placeOrder(req, res, next) {
   try {
@@ -44,6 +56,61 @@ export async function getMyOrderById(req, res, next) {
 
     return res.status(200).json({
       ok: true,
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
+    return next(error);
+  }
+}
+
+export async function listSellerOrderItems(req, res, next) {
+  try {
+    if (req.user.role !== "SELLER") {
+      return res.status(403).json({ ok: false, message: "Forbidden" });
+    }
+
+    const query = sellerOrderItemsQuerySchema.parse(req.query);
+    const data = await listOrderItemsBySeller(req.user.sub, query);
+
+    return res.status(200).json({
+      ok: true,
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
+    return next(error);
+  }
+}
+
+export async function patchSellerOrderItemStatus(req, res, next) {
+  try {
+    if (req.user.role !== "SELLER") {
+      return res.status(403).json({ ok: false, message: "Forbidden" });
+    }
+
+    const { itemId } = sellerOrderItemParamsSchema.parse(req.params);
+    const { sellerStatus } = sellerOrderItemStatusSchema.parse(req.body);
+
+    const data = await updateSellerOrderItemStatus(req.user.sub, itemId, sellerStatus);
+
+    return res.status(200).json({
+      ok: true,
+      message: "Seller item status updated",
       data
     });
   } catch (error) {

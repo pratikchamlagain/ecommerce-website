@@ -15,3 +15,17 @@ export const createOrderSchema = z.object({
 export const orderParamsSchema = z.object({
   orderId: z.string().min(1)
 });
+
+export const sellerOrderItemsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  status: z.string().trim().optional()
+});
+
+export const sellerOrderItemParamsSchema = z.object({
+  itemId: z.string().min(1)
+});
+
+export const sellerOrderItemStatusSchema = z.object({
+  sellerStatus: z.enum(["PENDING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"])
+});

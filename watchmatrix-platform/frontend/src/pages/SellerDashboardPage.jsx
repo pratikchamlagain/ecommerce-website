@@ -5,7 +5,9 @@ import {
   createSellerProduct,
   deleteSellerProduct,
   fetchSellerCategories,
+  fetchSellerOrderItems,
   fetchSellerProducts,
+  updateSellerOrderItemStatus,
   updateSellerProduct
 } from "../lib/sellerProductsApi";
 
@@ -22,6 +24,9 @@ export default function SellerDashboardPage() {
   });
 
   const [error, setError] = useState("");
+  const [orderStatus, setOrderStatus] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderStatusDrafts, setOrderStatusDrafts] = useState({});
 
   const productsQuery = useQuery({
     queryKey: ["seller-products"],
@@ -31,6 +36,11 @@ export default function SellerDashboardPage() {
   const categoriesQuery = useQuery({
     queryKey: ["seller-categories"],
     queryFn: fetchSellerCategories
+  });
+
+  const sellerOrdersQuery = useQuery({
+    queryKey: ["seller-order-items", orderStatus, orderPage],
+    queryFn: () => fetchSellerOrderItems({ page: orderPage, limit: 8, status: orderStatus || undefined })
   });
 
   const createMutation = useMutation({
@@ -57,6 +67,7 @@ export default function SellerDashboardPage() {
     mutationFn: deleteSellerProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seller-products"] });
+      queryClient.invalidateQueries({ queryKey: ["seller-order-items"] });
     }
   });
 
@@ -64,6 +75,13 @@ export default function SellerDashboardPage() {
     mutationFn: ({ productId, stock }) => updateSellerProduct(productId, { stock }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seller-products"] });
+    }
+  });
+
+  const sellerItemStatusMutation = useMutation({
+    mutationFn: ({ itemId, sellerStatus }) => updateSellerOrderItemStatus(itemId, sellerStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller-order-items"] });
     }
   });
 
@@ -90,6 +108,23 @@ export default function SellerDashboardPage() {
     }
 
     await stockMutation.mutateAsync({ productId, stock: nextStock });
+  }
+
+  function getDraftStatus(item) {
+    return orderStatusDrafts[item.id] || item.sellerStatus || "PENDING";
+  }
+
+  async function onUpdateSellerItemStatus(item) {
+    const draft = getDraftStatus(item);
+
+    if (draft === item.sellerStatus) {
+      return;
+    }
+
+    await sellerItemStatusMutation.mutateAsync({
+      itemId: item.id,
+      sellerStatus: draft
+    });
   }
 
   return (
@@ -169,6 +204,130 @@ export default function SellerDashboardPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="wm-card mt-6 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="m-0 text-xl text-slate-900">My Sold Items</h3>
+            <p className="m-0 mt-1 text-sm text-slate-600">Items from customer orders that include your products.</p>
+          </div>
+
+          <select
+            className="wm-input w-[220px]"
+            value={orderStatus}
+            onChange={(event) => {
+              setOrderStatus(event.target.value);
+              setOrderPage(1);
+            }}
+          >
+            <option value="">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+        {sellerOrdersQuery.isPending ? <p className="wm-muted mt-4">Loading sold items...</p> : null}
+        {sellerOrdersQuery.isError ? <p className="mt-4 text-sm text-rose-600">Unable to load seller order items.</p> : null}
+
+        {!sellerOrdersQuery.isPending && !sellerOrdersQuery.isError && (sellerOrdersQuery.data?.items || []).length === 0 ? (
+          <p className="wm-muted mt-4">No sold items found for this filter.</p>
+        ) : null}
+
+        {(sellerOrdersQuery.data?.items || []).length > 0 ? (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[860px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-left text-slate-500">
+                  <th className="py-2 pr-3 font-semibold">Order</th>
+                  <th className="py-2 pr-3 font-semibold">Product</th>
+                  <th className="py-2 pr-3 font-semibold">Qty</th>
+                  <th className="py-2 pr-3 font-semibold">Subtotal</th>
+                  <th className="py-2 pr-3 font-semibold">Customer</th>
+                  <th className="py-2 pr-3 font-semibold">Status</th>
+                  <th className="py-2 pr-3 font-semibold">Fulfillment</th>
+                  <th className="py-2 pr-3 font-semibold">Placed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(sellerOrdersQuery.data?.items || []).map((item) => (
+                  <tr className="border-b border-slate-100" key={item.id}>
+                    <td className="py-2 pr-3 text-slate-700">#{item.order.id}</td>
+                    <td className="py-2 pr-3">
+                      <p className="m-0 font-semibold text-slate-900">{item.productName}</p>
+                      <p className="m-0 text-xs text-slate-500">{item.productBrand}</p>
+                    </td>
+                    <td className="py-2 pr-3 text-slate-900">{item.quantity}</td>
+                    <td className="py-2 pr-3 text-slate-900">Rs. {Number(item.subtotal).toFixed(2)}</td>
+                    <td className="py-2 pr-3 text-slate-700">
+                      <p className="m-0">{item.order.customerName}</p>
+                      <p className="m-0 text-xs text-slate-500">{item.order.customerEmail}</p>
+                    </td>
+                    <td className="py-2 pr-3">
+                      <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+                        {item.order.status}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <select
+                          className="wm-input w-[140px] py-1 text-xs"
+                          value={getDraftStatus(item)}
+                          onChange={(event) => {
+                            setOrderStatusDrafts((prev) => ({
+                              ...prev,
+                              [item.id]: event.target.value
+                            }));
+                          }}
+                        >
+                          <option value="PENDING">PENDING</option>
+                          <option value="PACKED">PACKED</option>
+                          <option value="SHIPPED">SHIPPED</option>
+                          <option value="DELIVERED">DELIVERED</option>
+                          <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                        <button
+                          className="wm-btn-secondary px-2 py-1 text-xs"
+                          type="button"
+                          disabled={sellerItemStatusMutation.isPending}
+                          onClick={() => onUpdateSellerItemStatus(item)}
+                        >
+                          Update
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-2 pr-3 text-slate-600">{new Date(item.order.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+
+        {sellerOrdersQuery.data?.pagination ? (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <button
+              className="wm-btn-secondary px-4"
+              type="button"
+              disabled={sellerOrdersQuery.data.pagination.page <= 1}
+              onClick={() => setOrderPage((prev) => Math.max(1, prev - 1))}
+            >
+              Previous
+            </button>
+            <p className="m-0 text-sm text-slate-600">
+              Page {sellerOrdersQuery.data.pagination.page} of {sellerOrdersQuery.data.pagination.totalPages} | Total {sellerOrdersQuery.data.pagination.total}
+            </p>
+            <button
+              className="wm-btn-secondary px-4"
+              type="button"
+              disabled={sellerOrdersQuery.data.pagination.page >= sellerOrdersQuery.data.pagination.totalPages}
+              onClick={() => setOrderPage((prev) => Math.min(sellerOrdersQuery.data.pagination.totalPages, prev + 1))}
+            >
+              Next
+            </button>
+          </div>
+        ) : null}
       </section>
     </PageShell>
   );

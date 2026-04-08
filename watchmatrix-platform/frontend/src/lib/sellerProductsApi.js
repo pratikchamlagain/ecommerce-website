@@ -24,3 +24,13 @@ export async function deleteSellerProduct(productId) {
   const response = await apiClient.delete(`/seller/products/${productId}`);
   return response.data;
 }
+
+export async function fetchSellerOrderItems(params = {}) {
+  const response = await apiClient.get("/orders/seller/items", { params });
+  return response.data.data;
+}
+
+export async function updateSellerOrderItemStatus(itemId, sellerStatus) {
+  const response = await apiClient.patch(`/orders/seller/items/${itemId}/status`, { sellerStatus });
+  return response.data.data;
+}
