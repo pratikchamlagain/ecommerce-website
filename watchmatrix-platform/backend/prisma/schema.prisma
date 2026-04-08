@@ -28,6 +28,7 @@ model User {
   adminActionLogs AdminAuditLog[] @relation("AdminActorLogs")
   adminTargetLogs AdminAuditLog[] @relation("AdminTargetLogs")
   sellerFulfillmentLogs SellerFulfillmentLog[]
+  notifications Notification[]
 }
 
 enum UserRole {
@@ -155,4 +156,17 @@ model SellerFulfillmentLog {
 
   seller         User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   orderItem      OrderItem        @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

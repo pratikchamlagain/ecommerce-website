@@ -285,7 +285,8 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
       order: {
         select: {
           id: true,
-          status: true
+          status: true,
+          userId: true
         }
       },
       product: {
@@ -360,6 +361,21 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
         orderItemId: itemId,
         previousStatus: item.sellerStatus,
         nextStatus: sellerStatus
+      }
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: item.order.userId,
+        type: "ORDER_ITEM_STATUS_UPDATED",
+        title: "Order item updated",
+        message: `${item.productName} is now ${sellerStatus}`,
+        metadata: {
+          orderId: item.order.id,
+          orderItemId: item.id,
+          previousStatus: item.sellerStatus,
+          nextStatus: sellerStatus
+        }
       }
     });
 
