@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import dotenv from "dotenv";
 import path from "node:path";
 import authRouter from "./modules/auth/auth.routes.js";
@@ -16,7 +17,27 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((item) => item.trim())
+  .filter(Boolean);
+
+const allowWildcard = allowedOrigins.includes("*");
+
+function corsOrigin(origin, callback) {
+  if (!origin) {
+    return callback(null, true);
+  }
+
+  if (allowWildcard || allowedOrigins.includes(origin)) {
+    return callback(null, true);
+  }
+
+  return callback(new Error("CORS origin is not allowed"));
+}
+
+app.use(helmet());
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
