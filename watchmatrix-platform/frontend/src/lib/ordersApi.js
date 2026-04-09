@@ -14,3 +14,8 @@ export async function fetchOrderById(orderId) {
   const response = await apiClient.get(`/orders/${orderId}`);
   return response.data.data;
 }
+
+export async function cancelOrderById(orderId) {
+  const response = await apiClient.patch(`/orders/${orderId}/cancel`);
+  return response.data.data;
+}

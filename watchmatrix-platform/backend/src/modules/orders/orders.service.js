@@ -1,6 +1,11 @@
 import prisma from "../../config/prisma.js";
 
 function toPublicOrder(order) {
+  const isCancelableByCustomer =
+    order.status === "PENDING" &&
+    (order.items || []).length > 0 &&
+    order.items.every((item) => item.sellerStatus === "PENDING");
+
   return {
     id: order.id,
     status: order.status,
@@ -30,6 +35,7 @@ function toPublicOrder(order) {
       shippedAt: item.shippedAt || null,
       deliveredAt: item.deliveredAt || null
     })),
+    isCancelableByCustomer,
     createdAt: order.createdAt
   };
 }
@@ -187,6 +193,129 @@ export async function getOrderByIdForUser(userId, orderId) {
   }
 
   return toPublicOrder(order);
+}
+
+export async function cancelOrderByUser(userId, orderId) {
+  const order = await prisma.order.findFirst({
+    where: {
+      id: orderId,
+      userId
+    },
+    include: {
+      items: {
+        select: {
+          id: true,
+          productId: true,
+          quantity: true,
+          productName: true,
+          sellerStatus: true,
+          product: {
+            select: {
+              sellerId: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!order) {
+    const err = new Error("Order not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (order.status !== "PENDING") {
+    const err = new Error("Only pending orders can be cancelled");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (order.items.some((item) => item.sellerStatus !== "PENDING")) {
+    const err = new Error("Order can no longer be cancelled because fulfillment already started");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.order.update({
+      where: { id: orderId },
+      data: {
+        status: "CANCELLED"
+      }
+    });
+
+    await tx.orderItem.updateMany({
+      where: { orderId },
+      data: {
+        sellerStatus: "CANCELLED"
+      }
+    });
+
+    for (const item of order.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: {
+            increment: item.quantity
+          }
+        }
+      });
+    }
+
+    const sellerIds = Array.from(
+      new Set(
+        order.items
+          .map((item) => item.product?.sellerId)
+          .filter((sellerId) => Boolean(sellerId))
+      )
+    );
+
+    if (sellerIds.length > 0) {
+      await tx.notification.createMany({
+        data: sellerIds.map((sellerId) => ({
+          userId: sellerId,
+          type: "ORDER_CANCELLED_BY_BUYER",
+          title: "Order cancelled by buyer",
+          message: `Order ${order.id} was cancelled before fulfillment started.`,
+          metadata: {
+            orderId: order.id,
+            cancelledByUserId: userId
+          }
+        }))
+      });
+    }
+
+    await tx.notification.create({
+      data: {
+        userId,
+        type: "ORDER_CANCELLED_BY_BUYER",
+        title: "Order cancelled",
+        message: `Your order ${order.id} has been cancelled and stock was restored.`,
+        metadata: {
+          orderId: order.id
+        }
+      }
+    });
+  });
+
+  const updatedOrder = await prisma.order.findFirst({
+    where: {
+      id: orderId,
+      userId
+    },
+    include: {
+      items: true
+    }
+  });
+
+  if (!updatedOrder) {
+    const err = new Error("Order not found after cancellation");
+    err.statusCode = 500;
+    throw err;
+  }
+
+  return toPublicOrder(updatedOrder);
 }
 
 export async function listOrderItemsBySeller(sellerId, query) {

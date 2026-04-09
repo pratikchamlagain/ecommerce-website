@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import {
   fetchAdminAuditLogs,
@@ -333,7 +334,11 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {orders.map((order) => (
                     <tr className="border-b border-slate-100" key={order.id}>
-                      <td className="py-2 pr-3 text-slate-900">#{order.id.slice(0, 8)}</td>
+                      <td className="py-2 pr-3 text-slate-900">
+                        <Link className="font-semibold text-slate-900 hover:underline" to={`/admin/orders/${order.id}`}>
+                          #{order.id.slice(0, 8)}
+                        </Link>
+                      </td>
                       <td className="py-2 pr-3 text-slate-600">
                         <div>{order.customerName}</div>
                         <div className="text-xs text-slate-500">{order.customerEmail}</div>

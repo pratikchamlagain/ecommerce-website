@@ -337,3 +337,79 @@ export async function setOrderStatusByAdmin(adminId, orderId, status) {
     totalAmount: Number(updatedOrder.totalAmount)
   };
 }
+
+export async function getOrderDetailForAdmin(orderId) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true
+        }
+      },
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              sellerId: true,
+              seller: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!order) {
+    const err = new Error("Order not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  return {
+    id: order.id,
+    status: order.status,
+    paymentMethod: order.paymentMethod,
+    totalAmount: Number(order.totalAmount),
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    customer: {
+      id: order.user.id,
+      fullName: order.fullName,
+      email: order.email,
+      phone: order.phone,
+      accountEmail: order.user.email
+    },
+    shipping: {
+      addressLine1: order.addressLine1,
+      addressLine2: order.addressLine2,
+      city: order.city,
+      postalCode: order.postalCode,
+      notes: order.notes
+    },
+    items: order.items.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      productName: item.productName,
+      productBrand: item.productBrand,
+      quantity: item.quantity,
+      unitPrice: Number(item.unitPrice),
+      subtotal: Number(item.subtotal),
+      sellerStatus: item.sellerStatus,
+      courierName: item.courierName,
+      trackingNumber: item.trackingNumber,
+      shippedAt: item.shippedAt,
+      deliveredAt: item.deliveredAt,
+      seller: item.product?.seller || null
+    }))
+  };
+}

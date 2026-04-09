@@ -1,7 +1,8 @@
 import {
-  listOrdersQuerySchema,
   listAuditLogsQuerySchema,
+  listOrdersQuerySchema,
   listSellersQuerySchema,
+  orderDetailParamsSchema,
   orderStatusBodySchema,
   orderStatusParamsSchema,
   sellerStatusBodySchema,
@@ -9,6 +10,7 @@ import {
 } from "./admin.schema.js";
 import {
   getAdminOverview,
+  getOrderDetailForAdmin,
   listAdminAuditLogs,
   listOrdersForAdmin,
   listSellersForAdmin,
@@ -130,6 +132,28 @@ export async function updateOrderStatus(req, res, next) {
     return res.status(200).json({
       ok: true,
       message: "Order status updated",
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
+    return next(error);
+  }
+}
+
+export async function orderDetail(req, res, next) {
+  try {
+    const { orderId } = orderDetailParamsSchema.parse(req.params);
+    const data = await getOrderDetailForAdmin(orderId);
+
+    return res.status(200).json({
+      ok: true,
       data
     });
   } catch (error) {

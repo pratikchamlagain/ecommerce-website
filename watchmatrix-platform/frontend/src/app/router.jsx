@@ -8,6 +8,7 @@ import OrderSuccessPage from "../pages/OrderSuccessPage";
 import OrderDetailPage from "../pages/OrderDetailPage";
 import SellerDashboardPage from "../pages/SellerDashboardPage";
 import AdminDashboardPage from "../pages/AdminDashboardPage";
+import AdminOrderDetailPage from "../pages/AdminOrderDetailPage";
 import AboutPage from "../pages/AboutPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import LoginPage from "../pages/LoginPage";
@@ -35,6 +36,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth allowedRoles={["ADMIN"]}>
         <AdminDashboardPage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/admin/orders/:orderId",
+    element: (
+      <RequireAuth allowedRoles={["ADMIN"]}>
+        <AdminOrderDetailPage />
       </RequireAuth>
     )
   },

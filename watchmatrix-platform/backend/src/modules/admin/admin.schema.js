@@ -34,3 +34,7 @@ export const orderStatusParamsSchema = z.object({
 export const orderStatusBodySchema = z.object({
   status: z.enum(["PENDING", "PROCESSING", "COMPLETED", "CANCELLED"])
 });
+
+export const orderDetailParamsSchema = z.object({
+  orderId: z.string().min(1)
+});

@@ -29,3 +29,8 @@ export async function updateAdminOrderStatus(orderId, status) {
   const response = await apiClient.patch(`/admin/orders/${orderId}/status`, { status });
   return response.data.data;
 }
+
+export async function fetchAdminOrderById(orderId) {
+  const response = await apiClient.get(`/admin/orders/${orderId}`);
+  return response.data.data;
+}

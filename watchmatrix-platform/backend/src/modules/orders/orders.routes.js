@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth.js";
 import {
+	cancelMyOrder,
 	getMyOrderById,
 	listSellerFulfillmentHistory,
 	listMyOrders,
@@ -17,6 +18,7 @@ ordersRouter.get("/seller/fulfillment-logs", listSellerFulfillmentHistory);
 ordersRouter.patch("/seller/items/:itemId/status", patchSellerOrderItemStatus);
 ordersRouter.post("/", placeOrder);
 ordersRouter.get("/", listMyOrders);
+ordersRouter.patch("/:orderId/cancel", cancelMyOrder);
 ordersRouter.get("/:orderId", getMyOrderById);
 
 export default ordersRouter;

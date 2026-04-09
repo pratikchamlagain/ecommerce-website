@@ -10,6 +10,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
     "images:recache": "node scripts/recache-product-images.js",
+    "predeploy:check": "node scripts/predeploy-check.js",
     "test": "echo \"No tests configured yet\""
   },
   "keywords": [],

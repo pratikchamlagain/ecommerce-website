@@ -35,6 +35,30 @@ npx prisma migrate dev --name init
 npm run prisma:seed
 ```
 
+## Pre-Deployment Checklist Command
+
+Before deployment, run:
+
+```bash
+npm --prefix backend run predeploy:check
+```
+
+This checks:
+- Required backend env vars and basic security constraints
+- Presence of Prisma migrations
+- Prisma client generation
+- Frontend production build
+
+## Seed Safety
+
+The seed script now blocks production execution unless explicitly allowed.
+
+To intentionally seed in production (not recommended by default), set:
+
+```bash
+ALLOW_PROD_SEED=true
+```
+
 ## Current API
 
 - `GET /api/v1/health`

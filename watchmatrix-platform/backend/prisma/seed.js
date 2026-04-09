@@ -2,7 +2,15 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+function assertSeedSafety() {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "true") {
+    throw new Error("Seeding is blocked in production. Set ALLOW_PROD_SEED=true only if intentional.");
+  }
+}
+
 async function main() {
+  assertSeedSafety();
+
   const categories = [
     { name: "Men", slug: "men" },
     { name: "Women", slug: "women" },
@@ -24,6 +32,10 @@ async function main() {
     kids: await prisma.category.findUnique({ where: { slug: "kids" } }),
     luxury: await prisma.category.findUnique({ where: { slug: "luxury" } })
   };
+
+  if (!categoryMap.men || !categoryMap.women || !categoryMap.kids || !categoryMap.luxury) {
+    throw new Error("Category bootstrap failed. Cannot continue product seeding.");
+  }
 
   const products = [
     {

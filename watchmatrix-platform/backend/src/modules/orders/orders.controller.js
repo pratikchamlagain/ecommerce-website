@@ -7,6 +7,7 @@ import {
   sellerOrderItemStatusSchema
 } from "./orders.schema.js";
 import {
+  cancelOrderByUser,
   createOrder,
   getOrderByIdForUser,
   listSellerFulfillmentLogs,
@@ -58,6 +59,29 @@ export async function getMyOrderById(req, res, next) {
 
     return res.status(200).json({
       ok: true,
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
+    return next(error);
+  }
+}
+
+export async function cancelMyOrder(req, res, next) {
+  try {
+    const { orderId } = orderParamsSchema.parse(req.params);
+    const data = await cancelOrderByUser(req.user.sub, orderId);
+
+    return res.status(200).json({
+      ok: true,
+      message: "Order cancelled successfully",
       data
     });
   } catch (error) {
