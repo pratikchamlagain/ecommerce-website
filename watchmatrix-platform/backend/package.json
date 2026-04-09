@@ -11,7 +11,7 @@
     "prisma:seed": "node prisma/seed.js",
     "images:recache": "node scripts/recache-product-images.js",
     "predeploy:check": "node scripts/predeploy-check.js",
-    "test": "echo \"No tests configured yet\""
+    "test": "node --test tests"
   },
   "keywords": [],
   "author": "",

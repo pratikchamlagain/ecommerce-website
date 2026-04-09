@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth.js";
 import { chatMessageThrottle } from "../../middlewares/chatThrottle.js";
+import { chatContentModeration } from "../../middlewares/chatModeration.js";
 import { chatCreateRateLimit } from "../../middlewares/rateLimit.js";
 import {
   contacts,
@@ -23,7 +24,7 @@ chatRouter.get("/escalations", escalations);
 chatRouter.get("/conversations", conversations);
 chatRouter.post("/conversations", chatCreateRateLimit, createConversation);
 chatRouter.get("/conversations/:conversationId/messages", messages);
-chatRouter.post("/conversations/:conversationId/messages", chatMessageThrottle, sendMessage);
+chatRouter.post("/conversations/:conversationId/messages", chatMessageThrottle, chatContentModeration, sendMessage);
 chatRouter.patch("/conversations/:conversationId/read", readConversation);
 chatRouter.post("/conversations/:conversationId/escalate", chatCreateRateLimit, escalateConversation);
 
