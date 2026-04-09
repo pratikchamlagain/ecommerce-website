@@ -28,6 +28,7 @@ export default function SellerDashboardPage() {
   const [orderStatus, setOrderStatus] = useState("");
   const [orderPage, setOrderPage] = useState(1);
   const [orderStatusDrafts, setOrderStatusDrafts] = useState({});
+  const [shipmentDrafts, setShipmentDrafts] = useState({});
 
   const productsQuery = useQuery({
     queryKey: ["seller-products"],
@@ -85,7 +86,7 @@ export default function SellerDashboardPage() {
   });
 
   const sellerItemStatusMutation = useMutation({
-    mutationFn: ({ itemId, sellerStatus }) => updateSellerOrderItemStatus(itemId, sellerStatus),
+    mutationFn: ({ itemId, payload }) => updateSellerOrderItemStatus(itemId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seller-order-items"] });
       queryClient.invalidateQueries({ queryKey: ["seller-fulfillment-logs"] });
@@ -138,7 +139,11 @@ export default function SellerDashboardPage() {
 
     await sellerItemStatusMutation.mutateAsync({
       itemId: item.id,
-      sellerStatus: draft
+      payload: {
+        sellerStatus: draft,
+        courierName: shipmentDrafts[item.id]?.courierName,
+        trackingNumber: shipmentDrafts[item.id]?.trackingNumber
+      }
     });
   }
 
@@ -309,9 +314,48 @@ export default function SellerDashboardPage() {
                           {sellerItemStatusMutation.isPending ? "Saving..." : "Update"}
                         </button>
                       </div>
+                      {getDraftStatus(item) === "SHIPPED" ? (
+                        <div className="mt-2 grid gap-2">
+                          <input
+                            className="wm-input h-8 text-xs"
+                            placeholder="Courier name"
+                            value={shipmentDrafts[item.id]?.courierName ?? item.courierName ?? ""}
+                            onChange={(event) => {
+                              const nextCourier = event.target.value;
+                              setShipmentDrafts((prev) => ({
+                                ...prev,
+                                [item.id]: {
+                                  courierName: nextCourier,
+                                  trackingNumber: prev[item.id]?.trackingNumber ?? item.trackingNumber ?? ""
+                                }
+                              }));
+                            }}
+                          />
+                          <input
+                            className="wm-input h-8 text-xs"
+                            placeholder="Tracking number"
+                            value={shipmentDrafts[item.id]?.trackingNumber ?? item.trackingNumber ?? ""}
+                            onChange={(event) => {
+                              const nextTracking = event.target.value;
+                              setShipmentDrafts((prev) => ({
+                                ...prev,
+                                [item.id]: {
+                                  courierName: prev[item.id]?.courierName ?? item.courierName ?? "",
+                                  trackingNumber: nextTracking
+                                }
+                              }));
+                            }}
+                          />
+                        </div>
+                      ) : null}
                       <div className="mt-2">
                         <span className={getSellerStatusBadgeClass(item.sellerStatus)}>{item.sellerStatus}</span>
                       </div>
+                      {item.courierName || item.trackingNumber ? (
+                        <p className="m-0 mt-2 text-[11px] text-slate-600">
+                          {item.courierName ? `Courier: ${item.courierName}` : "Courier: -"} | {item.trackingNumber ? `Tracking: ${item.trackingNumber}` : "Tracking: -"}
+                        </p>
+                      ) : null}
                     </td>
                     <td className="py-2 pr-3 text-slate-600">{new Date(item.order.createdAt).toLocaleDateString()}</td>
                   </tr>

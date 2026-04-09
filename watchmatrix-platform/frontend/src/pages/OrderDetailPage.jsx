@@ -85,6 +85,14 @@ export default function OrderDetailPage() {
                     <span className={getStatusChipClass(item.sellerStatus || "PENDING")}>{item.sellerStatus || "PENDING"}</span>
                   </div>
 
+                  {item.courierName || item.trackingNumber ? (
+                    <p className="m-0 mt-2 text-xs text-slate-700">
+                      {item.courierName ? `Courier: ${item.courierName}` : "Courier: -"}
+                      {" | "}
+                      {item.trackingNumber ? `Tracking: ${item.trackingNumber}` : "Tracking: -"}
+                    </p>
+                  ) : null}
+
                   {item.sellerStatus === "CANCELLED" ? (
                     <p className="m-0 mt-2 text-xs font-semibold text-rose-700">This item was cancelled by seller fulfillment workflow.</p>
                   ) : (

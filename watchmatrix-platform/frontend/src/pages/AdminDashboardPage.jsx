@@ -3,8 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PageShell from "../components/common/PageShell";
 import {
   fetchAdminAuditLogs,
+  fetchAdminOrders,
   fetchAdminOverview,
   fetchAdminSellers,
+  updateAdminOrderStatus,
   updateSellerStatus
 } from "../lib/adminApi";
 
@@ -13,6 +15,9 @@ export default function AdminDashboardPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatus, setOrderStatus] = useState("all");
+  const [orderPage, setOrderPage] = useState(1);
   const [pendingAction, setPendingAction] = useState(null);
   const [toasts, setToasts] = useState([]);
 
@@ -36,6 +41,13 @@ export default function AdminDashboardPage() {
     queryFn: fetchAdminOverview
   });
 
+  const orderQueryParams = useMemo(() => ({
+    search: orderSearch.trim() || undefined,
+    status: orderStatus,
+    page: orderPage,
+    limit: 8
+  }), [orderPage, orderSearch, orderStatus]);
+
   const sellersQuery = useQuery({
     queryKey: ["admin-sellers", sellerQueryParams],
     queryFn: () => fetchAdminSellers(sellerQueryParams)
@@ -46,9 +58,16 @@ export default function AdminDashboardPage() {
     queryFn: () => fetchAdminAuditLogs({ page: 1, limit: 8 })
   });
 
+  const ordersQuery = useQuery({
+    queryKey: ["admin-orders", orderQueryParams],
+    queryFn: () => fetchAdminOrders(orderQueryParams)
+  });
+
   const overview = overviewQuery.data;
   const sellers = sellersQuery.data?.items || [];
   const sellersPagination = sellersQuery.data?.pagination;
+  const orders = ordersQuery.data?.items || [];
+  const ordersPagination = ordersQuery.data?.pagination;
 
   const statusMutation = useMutation({
     mutationFn: ({ sellerId, isActive }) => updateSellerStatus(sellerId, isActive),
@@ -62,6 +81,18 @@ export default function AdminDashboardPage() {
     onError: (error) => {
       pushToast("error", error?.response?.data?.message || "Could not update seller status.");
       setPendingAction(null);
+    }
+  });
+
+  const orderStatusMutation = useMutation({
+    mutationFn: ({ orderId, status: nextStatus }) => updateAdminOrderStatus(orderId, nextStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-audit-logs"] });
+      pushToast("success", "Order status updated successfully.");
+    },
+    onError: (error) => {
+      pushToast("error", error?.response?.data?.message || "Could not update order status.");
     }
   });
 
@@ -83,6 +114,15 @@ export default function AdminDashboardPage() {
       isActive: pendingAction.nextIsActive
     });
   }
+
+  function handleOrderStatusChange(orderId, nextStatus) {
+    orderStatusMutation.mutate({
+      orderId,
+      status: nextStatus
+    });
+  }
+
+  const orderStatusOptions = ["PENDING", "PROCESSING", "COMPLETED", "CANCELLED"];
 
   return (
     <PageShell title="Admin Dashboard">
@@ -231,6 +271,121 @@ export default function AdminDashboardPage() {
               </button>
             </div>
           ) : null}
+          </>
+        ) : null}
+      </section>
+
+      <section className="wm-card mt-6 p-5">
+        <h3 className="m-0 text-xl text-slate-900">Order Operations</h3>
+        <p className="m-0 mt-1 text-sm text-slate-600">Search orders and update status from a single control panel.</p>
+
+        <div className="mt-4 grid gap-2 md:grid-cols-[1fr_220px]">
+          <input
+            className="wm-input"
+            placeholder="Search by order ID, customer name, or email"
+            type="text"
+            value={orderSearch}
+            onChange={(event) => {
+              setOrderSearch(event.target.value);
+              setOrderPage(1);
+            }}
+          />
+
+          <select
+            className="wm-input"
+            value={orderStatus}
+            onChange={(event) => {
+              setOrderStatus(event.target.value);
+              setOrderPage(1);
+            }}
+          >
+            <option value="all">All Statuses</option>
+            <option value="PENDING">PENDING</option>
+            <option value="PROCESSING">PROCESSING</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+        </div>
+
+        {ordersQuery.isPending ? <p className="wm-muted mt-3">Loading orders...</p> : null}
+        {ordersQuery.isError ? <p className="mt-3 text-sm text-rose-600">Could not load orders list.</p> : null}
+
+        {!ordersQuery.isPending && !ordersQuery.isError && orders.length === 0 ? (
+          <p className="wm-muted mt-3">No orders found for this filter.</p>
+        ) : null}
+
+        {orders.length > 0 ? (
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[860px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-slate-500">
+                    <th className="py-2 pr-3 font-semibold">Order</th>
+                    <th className="py-2 pr-3 font-semibold">Customer</th>
+                    <th className="py-2 pr-3 font-semibold">City</th>
+                    <th className="py-2 pr-3 font-semibold">Items</th>
+                    <th className="py-2 pr-3 font-semibold">Amount</th>
+                    <th className="py-2 pr-3 font-semibold">Status</th>
+                    <th className="py-2 pr-3 font-semibold">Created</th>
+                    <th className="py-2 pr-3 font-semibold">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr className="border-b border-slate-100" key={order.id}>
+                      <td className="py-2 pr-3 text-slate-900">#{order.id.slice(0, 8)}</td>
+                      <td className="py-2 pr-3 text-slate-600">
+                        <div>{order.customerName}</div>
+                        <div className="text-xs text-slate-500">{order.customerEmail}</div>
+                      </td>
+                      <td className="py-2 pr-3 text-slate-600">{order.city}</td>
+                      <td className="py-2 pr-3 text-slate-900">{order.totalItems}</td>
+                      <td className="py-2 pr-3 text-slate-900">Rs. {order.totalAmount.toFixed(2)}</td>
+                      <td className="py-2 pr-3">
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{order.status}</span>
+                      </td>
+                      <td className="py-2 pr-3 text-slate-600">{new Date(order.createdAt).toLocaleString()}</td>
+                      <td className="py-2 pr-3">
+                        <select
+                          className="wm-input h-9 min-w-[140px] text-xs"
+                          value={order.status}
+                          onChange={(event) => handleOrderStatusChange(order.id, event.target.value)}
+                          disabled={orderStatusMutation.isPending}
+                        >
+                          {orderStatusOptions.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {ordersPagination ? (
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <button
+                  className="wm-btn-secondary px-4"
+                  type="button"
+                  disabled={ordersPagination.page <= 1}
+                  onClick={() => setOrderPage((prev) => Math.max(1, prev - 1))}
+                >
+                  Previous
+                </button>
+                <p className="m-0 text-sm text-slate-600">
+                  Page {ordersPagination.page} of {ordersPagination.totalPages} | Total {ordersPagination.total}
+                </p>
+                <button
+                  className="wm-btn-secondary px-4"
+                  type="button"
+                  disabled={ordersPagination.page >= ordersPagination.totalPages}
+                  onClick={() => setOrderPage((prev) => Math.min(ordersPagination.totalPages, prev + 1))}
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
           </>
         ) : null}
       </section>

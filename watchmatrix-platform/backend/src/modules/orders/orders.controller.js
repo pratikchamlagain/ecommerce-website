@@ -106,9 +106,9 @@ export async function patchSellerOrderItemStatus(req, res, next) {
     }
 
     const { itemId } = sellerOrderItemParamsSchema.parse(req.params);
-    const { sellerStatus } = sellerOrderItemStatusSchema.parse(req.body);
+    const payload = sellerOrderItemStatusSchema.parse(req.body);
 
-    const data = await updateSellerOrderItemStatus(req.user.sub, itemId, sellerStatus);
+    const data = await updateSellerOrderItemStatus(req.user.sub, itemId, payload);
 
     return res.status(200).json({
       ok: true,

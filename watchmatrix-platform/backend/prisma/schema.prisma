@@ -118,6 +118,10 @@ model OrderItem {
   productName  String
   productBrand String
   sellerStatus SellerItemStatus @default(PENDING)
+  courierName  String?
+  trackingNumber String?
+  shippedAt    DateTime?
+  deliveredAt  DateTime?
   createdAt    DateTime  @default(now())
 
   order        Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)

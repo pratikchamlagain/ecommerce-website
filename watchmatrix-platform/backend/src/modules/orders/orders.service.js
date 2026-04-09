@@ -24,7 +24,11 @@ function toPublicOrder(order) {
       quantity: item.quantity,
       unitPrice: Number(item.unitPrice),
       subtotal: Number(item.subtotal),
-      sellerStatus: item.sellerStatus
+      sellerStatus: item.sellerStatus,
+      courierName: item.courierName || null,
+      trackingNumber: item.trackingNumber || null,
+      shippedAt: item.shippedAt || null,
+      deliveredAt: item.deliveredAt || null
     })),
     createdAt: order.createdAt
   };
@@ -250,6 +254,10 @@ export async function listOrderItemsBySeller(sellerId, query) {
       unitPrice: Number(item.unitPrice),
       subtotal: Number(item.subtotal),
       sellerStatus: item.sellerStatus,
+      courierName: item.courierName || null,
+      trackingNumber: item.trackingNumber || null,
+      shippedAt: item.shippedAt || null,
+      deliveredAt: item.deliveredAt || null,
       order: {
         id: item.order.id,
         status: item.order.status,
@@ -273,7 +281,8 @@ export async function listOrderItemsBySeller(sellerId, query) {
   };
 }
 
-export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus) {
+export async function updateSellerOrderItemStatus(sellerId, itemId, payload) {
+  const { sellerStatus } = payload;
   const item = await prisma.orderItem.findFirst({
     where: {
       id: itemId,
@@ -312,10 +321,35 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
     throw err;
   }
 
+  const trimmedCourierName = payload.courierName?.trim();
+  const trimmedTrackingNumber = payload.trackingNumber?.trim();
+
+  if (sellerStatus === "SHIPPED") {
+    if (!trimmedCourierName || !trimmedTrackingNumber) {
+      const err = new Error("Courier name and tracking number are required for SHIPPED status");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+
+  const updateData = {
+    sellerStatus
+  };
+
+  if (sellerStatus === "SHIPPED") {
+    updateData.courierName = trimmedCourierName;
+    updateData.trackingNumber = trimmedTrackingNumber;
+    updateData.shippedAt = item.shippedAt || new Date();
+  }
+
+  if (sellerStatus === "DELIVERED") {
+    updateData.deliveredAt = item.deliveredAt || new Date();
+  }
+
   const updated = await prisma.$transaction(async (tx) => {
     const changed = await tx.orderItem.update({
       where: { id: itemId },
-      data: { sellerStatus },
+      data: updateData,
       include: {
         order: {
           select: {
@@ -374,7 +408,9 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
           orderId: item.order.id,
           orderItemId: item.id,
           previousStatus: item.sellerStatus,
-          nextStatus: sellerStatus
+          nextStatus: sellerStatus,
+          courierName: sellerStatus === "SHIPPED" ? trimmedCourierName : item.courierName,
+          trackingNumber: sellerStatus === "SHIPPED" ? trimmedTrackingNumber : item.trackingNumber
         }
       }
     });
@@ -394,6 +430,10 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, sellerStatus
     unitPrice: Number(updated.unitPrice),
     subtotal: Number(updated.subtotal),
     sellerStatus: updated.sellerStatus,
+    courierName: updated.courierName || null,
+    trackingNumber: updated.trackingNumber || null,
+    shippedAt: updated.shippedAt || null,
+    deliveredAt: updated.deliveredAt || null,
     order: {
       id: updated.order.id,
       status: updated.order.status,

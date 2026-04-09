@@ -208,3 +208,132 @@ export async function listAdminAuditLogs(query) {
     }
   };
 }
+
+function buildOrderWhere(query) {
+  const where = {};
+
+  if (query.status !== "all") {
+    where.status = query.status;
+  }
+
+  if (query.search) {
+    where.OR = [
+      { id: { contains: query.search, mode: "insensitive" } },
+      { fullName: { contains: query.search, mode: "insensitive" } },
+      { email: { contains: query.search, mode: "insensitive" } }
+    ];
+  }
+
+  return where;
+}
+
+export async function listOrdersForAdmin(query) {
+  const where = buildOrderWhere(query);
+  const skip = (query.page - 1) * query.limit;
+
+  const [total, orders] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany({
+      where,
+      skip,
+      take: query.limit,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        status: true,
+        paymentMethod: true,
+        fullName: true,
+        email: true,
+        city: true,
+        totalAmount: true,
+        createdAt: true,
+        items: {
+          select: {
+            id: true,
+            quantity: true,
+            sellerStatus: true
+          }
+        }
+      }
+    })
+  ]);
+
+  return {
+    items: orders.map((order) => ({
+      id: order.id,
+      status: order.status,
+      paymentMethod: order.paymentMethod,
+      customerName: order.fullName,
+      customerEmail: order.email,
+      city: order.city,
+      totalAmount: Number(order.totalAmount),
+      totalItems: order.items.reduce((sum, item) => sum + item.quantity, 0),
+      hasDeliveredItems: order.items.some((item) => item.sellerStatus === "DELIVERED"),
+      createdAt: order.createdAt
+    })),
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / query.limit))
+    }
+  };
+}
+
+export async function setOrderStatusByAdmin(adminId, orderId, status) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      status: true,
+      fullName: true,
+      email: true
+    }
+  });
+
+  if (!order) {
+    const err = new Error("Order not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const updatedOrder = await prisma.$transaction(async (tx) => {
+    const updated = await tx.order.update({
+      where: { id: orderId },
+      data: { status },
+      select: {
+        id: true,
+        status: true,
+        paymentMethod: true,
+        fullName: true,
+        email: true,
+        city: true,
+        totalAmount: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    await tx.adminAuditLog.create({
+      data: {
+        adminId,
+        action: "ORDER_STATUS_UPDATED",
+        description: `Updated order ${order.id} status from ${order.status} to ${status}`,
+        metadata: {
+          orderId: order.id,
+          customerName: order.fullName,
+          customerEmail: order.email,
+          previousStatus: order.status,
+          nextStatus: status
+        }
+      }
+    });
+
+    return updated;
+  });
+
+  return {
+    ...updatedOrder,
+    totalAmount: Number(updatedOrder.totalAmount)
+  };
+}

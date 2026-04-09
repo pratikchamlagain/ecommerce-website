@@ -27,7 +27,9 @@ export const sellerOrderItemParamsSchema = z.object({
 });
 
 export const sellerOrderItemStatusSchema = z.object({
-  sellerStatus: z.enum(["PENDING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"])
+  sellerStatus: z.enum(["PENDING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"]),
+  courierName: z.string().trim().min(2).max(80).optional(),
+  trackingNumber: z.string().trim().min(2).max(120).optional()
 });
 
 export const sellerFulfillmentLogsQuerySchema = z.object({

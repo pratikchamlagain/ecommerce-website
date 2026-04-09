@@ -19,3 +19,13 @@ export async function fetchAdminAuditLogs(params = {}) {
   const response = await apiClient.get("/admin/audit-logs", { params });
   return response.data.data;
 }
+
+export async function fetchAdminOrders(params = {}) {
+  const response = await apiClient.get("/admin/orders", { params });
+  return response.data.data;
+}
+
+export async function updateAdminOrderStatus(orderId, status) {
+  const response = await apiClient.patch(`/admin/orders/${orderId}/status`, { status });
+  return response.data.data;
+}

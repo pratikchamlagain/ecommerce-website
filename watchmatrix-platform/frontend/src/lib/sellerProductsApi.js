@@ -30,8 +30,8 @@ export async function fetchSellerOrderItems(params = {}) {
   return response.data.data;
 }
 
-export async function updateSellerOrderItemStatus(itemId, sellerStatus) {
-  const response = await apiClient.patch(`/orders/seller/items/${itemId}/status`, { sellerStatus });
+export async function updateSellerOrderItemStatus(itemId, payload) {
+  const response = await apiClient.patch(`/orders/seller/items/${itemId}/status`, payload);
   return response.data.data;
 }
 
