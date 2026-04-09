@@ -398,12 +398,16 @@ export async function updateSellerOrderItemStatus(sellerId, itemId, payload) {
       }
     });
 
+    const shippedSuffix = sellerStatus === "SHIPPED"
+      ? ` via ${trimmedCourierName} (Tracking: ${trimmedTrackingNumber})`
+      : "";
+
     await tx.notification.create({
       data: {
         userId: item.order.userId,
         type: "ORDER_ITEM_STATUS_UPDATED",
         title: "Order item updated",
-        message: `${item.productName} is now ${sellerStatus}`,
+        message: `${item.productName} is now ${sellerStatus}${shippedSuffix}`,
         metadata: {
           orderId: item.order.id,
           orderItemId: item.id,
