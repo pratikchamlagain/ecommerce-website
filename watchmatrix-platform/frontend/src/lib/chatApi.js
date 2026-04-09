@@ -10,6 +10,11 @@ export async function fetchChatContacts() {
   return response.data.data;
 }
 
+export async function fetchContactChatOrders(contactId) {
+  const response = await apiClient.get(`/chat/contacts/${contactId}/orders`);
+  return response.data.data;
+}
+
 export async function createConversation(payload) {
   const response = await apiClient.post("/chat/conversations", payload);
   return response.data.data;

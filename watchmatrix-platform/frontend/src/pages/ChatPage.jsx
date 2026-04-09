@@ -5,6 +5,7 @@ import PageShell from "../components/common/PageShell";
 import {
   createConversation,
   fetchChatContacts,
+  fetchContactChatOrders,
   fetchConversationMessages,
   fetchMyConversations,
   markConversationRead,
@@ -54,6 +55,14 @@ export default function ChatPage() {
   const selectedConversation = conversations.find((item) => item.id === activeConversationId) || null;
   const contacts = contactsQuery.data || [];
   const hasSelectedContact = contacts.some((contact) => contact.id === newParticipantId);
+
+  const contactOrdersQuery = useQuery({
+    queryKey: ["chat-contact-orders", newParticipantId],
+    queryFn: () => fetchContactChatOrders(newParticipantId),
+    enabled: Boolean(newParticipantId)
+  });
+
+  const availableOrders = contactOrdersQuery.data || [];
 
   const messagesQuery = useQuery({
     queryKey: ["chat-messages", activeConversationId],
@@ -174,7 +183,10 @@ export default function ChatPage() {
             <select
               className="wm-input"
               value={newParticipantId}
-              onChange={(event) => setNewParticipantId(event.target.value)}
+              onChange={(event) => {
+                setNewParticipantId(event.target.value);
+                setNewOrderId("");
+              }}
               required
             >
               <option value="">Select contact</option>
@@ -187,12 +199,21 @@ export default function ChatPage() {
                 <option value={newParticipantId}>Selected from link ({newParticipantId.slice(0, 8)})</option>
               ) : null}
             </select>
-            <input
+            <select
               className="wm-input"
-              placeholder="Order ID (optional)"
               value={newOrderId}
               onChange={(event) => setNewOrderId(event.target.value)}
-            />
+              disabled={!newParticipantId || contactOrdersQuery.isPending}
+            >
+              <option value="">No specific order</option>
+              {availableOrders.map((order) => (
+                <option key={order.id} value={order.id}>
+                  #{order.id.slice(0, 8)} | {order.status} | Rs. {order.totalAmount.toFixed(2)} | {order.itemCount} items
+                </option>
+              ))}
+            </select>
+            {contactOrdersQuery.isPending ? <p className="m-0 text-xs text-slate-500">Loading related orders...</p> : null}
+            {contactOrdersQuery.isError ? <p className="m-0 text-xs text-rose-600">Could not load related orders.</p> : null}
             {contactsQuery.isPending ? <p className="m-0 text-xs text-slate-500">Loading contacts...</p> : null}
             {contactsQuery.isError ? <p className="m-0 text-xs text-rose-600">Could not load contacts.</p> : null}
             {formError ? <p className="m-0 text-xs text-rose-600">{formError}</p> : null}

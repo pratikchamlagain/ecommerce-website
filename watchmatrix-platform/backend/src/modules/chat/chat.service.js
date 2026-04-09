@@ -162,6 +162,98 @@ export async function listAllowedChatContacts(userId) {
   return sellers;
 }
 
+export async function listContactOrderLinks(userId, contactId) {
+  const [me, contact] = await Promise.all([
+    getUserById(userId),
+    getUserById(contactId)
+  ]);
+
+  if (!me || !contact || !contact.isActive) {
+    const err = new Error("Contact not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (!isAllowedRolePair(me.role, contact.role)) {
+    const err = new Error("Order-linked chat is not allowed for these roles");
+    err.statusCode = 403;
+    throw err;
+  }
+
+  let where = null;
+
+  if (me.role === "CUSTOMER" && contact.role === "SELLER") {
+    where = {
+      userId: me.id,
+      items: {
+        some: {
+          product: {
+            sellerId: contact.id
+          }
+        }
+      }
+    };
+  } else if (me.role === "SELLER" && contact.role === "CUSTOMER") {
+    where = {
+      userId: contact.id,
+      items: {
+        some: {
+          product: {
+            sellerId: me.id
+          }
+        }
+      }
+    };
+  } else if (me.role === "SELLER" && contact.role === "ADMIN") {
+    where = {
+      items: {
+        some: {
+          product: {
+            sellerId: me.id
+          }
+        }
+      }
+    };
+  } else if (me.role === "ADMIN" && contact.role === "SELLER") {
+    where = {
+      items: {
+        some: {
+          product: {
+            sellerId: contact.id
+          }
+        }
+      }
+    };
+  }
+
+  if (!where) {
+    return [];
+  }
+
+  const orders = await prisma.order.findMany({
+    where,
+    orderBy: {
+      createdAt: "desc"
+    },
+    take: 40,
+    include: {
+      items: {
+        select: {
+          quantity: true
+        }
+      }
+    }
+  });
+
+  return orders.map((order) => ({
+    id: order.id,
+    status: order.status,
+    totalAmount: Number(order.totalAmount),
+    createdAt: order.createdAt,
+    itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0)
+  }));
+}
+
 export async function listConversationsByUser(userId) {
   const conversations = await prisma.conversation.findMany({
     where: {

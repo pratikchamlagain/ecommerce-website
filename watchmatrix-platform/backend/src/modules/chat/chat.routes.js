@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth.js";
 import {
   contacts,
+  contactOrders,
   conversations,
   createConversation,
   messages,
@@ -13,6 +14,7 @@ const chatRouter = Router();
 
 chatRouter.use(requireAuth);
 chatRouter.get("/contacts", contacts);
+chatRouter.get("/contacts/:contactId/orders", contactOrders);
 chatRouter.get("/conversations", conversations);
 chatRouter.post("/conversations", createConversation);
 chatRouter.get("/conversations/:conversationId/messages", messages);

@@ -17,3 +17,7 @@ export const listMessagesQuerySchema = z.object({
 export const sendMessageSchema = z.object({
   content: z.string().trim().min(1).max(1500)
 });
+
+export const contactOrdersParamsSchema = z.object({
+  contactId: z.string().min(1)
+});

@@ -1,4 +1,5 @@
 import {
+  contactOrdersParamsSchema,
   conversationParamsSchema,
   createConversationSchema,
   listMessagesQuerySchema,
@@ -6,6 +7,7 @@ import {
 } from "./chat.schema.js";
 import {
   createOrGetConversation,
+  listContactOrderLinks,
   listAllowedChatContacts,
   listConversationsByUser,
   listMessagesByConversation,
@@ -22,6 +24,28 @@ export async function contacts(req, res, next) {
       data
     });
   } catch (error) {
+    return next(error);
+  }
+}
+
+export async function contactOrders(req, res, next) {
+  try {
+    const { contactId } = contactOrdersParamsSchema.parse(req.params);
+    const data = await listContactOrderLinks(req.user.sub, contactId);
+
+    return res.status(200).json({
+      ok: true,
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
     return next(error);
   }
 }
