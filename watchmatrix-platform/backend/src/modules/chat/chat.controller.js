@@ -6,11 +6,25 @@ import {
 } from "./chat.schema.js";
 import {
   createOrGetConversation,
+  listAllowedChatContacts,
   listConversationsByUser,
   listMessagesByConversation,
   markConversationRead,
   sendMessageToConversation
 } from "./chat.service.js";
+
+export async function contacts(req, res, next) {
+  try {
+    const data = await listAllowedChatContacts(req.user.sub);
+
+    return res.status(200).json({
+      ok: true,
+      data
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 export async function conversations(req, res, next) {
   try {

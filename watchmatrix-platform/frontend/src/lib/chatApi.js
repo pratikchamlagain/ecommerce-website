@@ -5,6 +5,11 @@ export async function fetchMyConversations() {
   return response.data.data;
 }
 
+export async function fetchChatContacts() {
+  const response = await apiClient.get("/chat/contacts");
+  return response.data.data;
+}
+
 export async function createConversation(payload) {
   const response = await apiClient.post("/chat/conversations", payload);
   return response.data.data;

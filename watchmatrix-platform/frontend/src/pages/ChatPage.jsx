@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import {
   createConversation,
+  fetchChatContacts,
   fetchConversationMessages,
   fetchMyConversations,
   markConversationRead,
@@ -42,10 +43,17 @@ export default function ChatPage() {
     queryFn: fetchMyConversations
   });
 
+  const contactsQuery = useQuery({
+    queryKey: ["chat-contacts"],
+    queryFn: fetchChatContacts
+  });
+
   const conversations = conversationsQuery.data || [];
   const activeConversationId = selectedConversationId || conversations[0]?.id || "";
 
   const selectedConversation = conversations.find((item) => item.id === activeConversationId) || null;
+  const contacts = contactsQuery.data || [];
+  const hasSelectedContact = contacts.some((contact) => contact.id === newParticipantId);
 
   const messagesQuery = useQuery({
     queryKey: ["chat-messages", activeConversationId],
@@ -129,6 +137,11 @@ export default function ChatPage() {
     event.preventDefault();
     setFormError("");
 
+    if (!newParticipantId.trim()) {
+      setFormError("Please select a chat contact.");
+      return;
+    }
+
     createConversationMutation.mutate({
       participantId: newParticipantId.trim(),
       orderId: newOrderId.trim() || undefined
@@ -154,20 +167,34 @@ export default function ChatPage() {
       <section className="grid gap-5 lg:grid-cols-[340px_1fr]">
         <aside className="wm-card p-4">
           <h3 className="m-0 text-lg text-slate-900">Start Conversation</h3>
+          <p className="m-0 mt-1 text-xs text-slate-600">
+            Customer can chat with seller. Seller can chat with customer and admin. Admin can chat with seller.
+          </p>
           <form className="mt-3 grid gap-2" onSubmit={onCreateConversation}>
-            <input
+            <select
               className="wm-input"
-              placeholder="Participant user ID"
               value={newParticipantId}
               onChange={(event) => setNewParticipantId(event.target.value)}
               required
-            />
+            >
+              <option value="">Select contact</option>
+              {contacts.map((contact) => (
+                <option key={contact.id} value={contact.id}>
+                  {contact.fullName} ({contact.role})
+                </option>
+              ))}
+              {!hasSelectedContact && newParticipantId ? (
+                <option value={newParticipantId}>Selected from link ({newParticipantId.slice(0, 8)})</option>
+              ) : null}
+            </select>
             <input
               className="wm-input"
               placeholder="Order ID (optional)"
               value={newOrderId}
               onChange={(event) => setNewOrderId(event.target.value)}
             />
+            {contactsQuery.isPending ? <p className="m-0 text-xs text-slate-500">Loading contacts...</p> : null}
+            {contactsQuery.isError ? <p className="m-0 text-xs text-rose-600">Could not load contacts.</p> : null}
             {formError ? <p className="m-0 text-xs text-rose-600">{formError}</p> : null}
             <button className="wm-btn-primary" type="submit" disabled={createConversationMutation.isPending}>
               {createConversationMutation.isPending ? "Creating..." : "Create / Open"}
@@ -181,7 +208,7 @@ export default function ChatPage() {
           <div className="mt-2 grid gap-2">
             {(conversationsQuery.data || []).map((conversation) => (
               <button
-                className={selectedConversationId === conversation.id
+                className={activeConversationId === conversation.id
                   ? "rounded-lg border border-slate-900 bg-slate-900 p-3 text-left text-white"
                   : "rounded-lg border border-slate-200 bg-white p-3 text-left text-slate-800"}
                 key={conversation.id}
@@ -189,7 +216,7 @@ export default function ChatPage() {
                 onClick={() => setSelectedConversationId(conversation.id)}
               >
                 <p className="m-0 text-sm font-semibold">{formatConversationTitle(conversation, authUser)}</p>
-                <p className={selectedConversationId === conversation.id ? "m-0 mt-1 text-xs text-slate-200" : "m-0 mt-1 text-xs text-slate-600"}>
+                <p className={activeConversationId === conversation.id ? "m-0 mt-1 text-xs text-slate-200" : "m-0 mt-1 text-xs text-slate-600"}>
                   {conversation.lastMessage?.content || "No messages yet"}
                 </p>
                 {conversation.unreadCount > 0 ? (

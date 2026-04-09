@@ -2,14 +2,12 @@ import prisma from "../../config/prisma.js";
 import { emitConversationMessage, emitUsersEvent } from "../../realtime/socket.js";
 
 function isAllowedRolePair(roleA, roleB) {
-  if (roleA === "ADMIN" || roleB === "ADMIN") {
-    return true;
-  }
-
   const customerSeller = roleA === "CUSTOMER" && roleB === "SELLER";
   const sellerCustomer = roleA === "SELLER" && roleB === "CUSTOMER";
+  const sellerAdmin = roleA === "SELLER" && roleB === "ADMIN";
+  const adminSeller = roleA === "ADMIN" && roleB === "SELLER";
 
-  return customerSeller || sellerCustomer;
+  return customerSeller || sellerCustomer || sellerAdmin || adminSeller;
 }
 
 async function getUserById(userId) {
@@ -66,6 +64,102 @@ function toConversationSummary(conversation, currentUserId, unreadCount = 0) {
       : null,
     unreadCount
   };
+}
+
+export async function listAllowedChatContacts(userId) {
+  const me = await getUserById(userId);
+
+  if (!me) {
+    const err = new Error("User not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (me.role === "CUSTOMER") {
+    const sellers = await prisma.user.findMany({
+      where: {
+        role: "SELLER",
+        isActive: true
+      },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true
+      },
+      orderBy: {
+        fullName: "asc"
+      }
+    });
+
+    return sellers;
+  }
+
+  if (me.role === "SELLER") {
+    const [customers, admins] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          role: "CUSTOMER",
+          isActive: true,
+          orders: {
+            some: {
+              items: {
+                some: {
+                  product: {
+                    sellerId: me.id
+                  }
+                }
+              }
+            }
+          }
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true
+        },
+        orderBy: {
+          fullName: "asc"
+        }
+      }),
+      prisma.user.findMany({
+        where: {
+          role: "ADMIN",
+          isActive: true
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true
+        },
+        orderBy: {
+          fullName: "asc"
+        }
+      })
+    ]);
+
+    return [...customers, ...admins];
+  }
+
+  const sellers = await prisma.user.findMany({
+    where: {
+      role: "SELLER",
+      isActive: true
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true
+    },
+    orderBy: {
+      fullName: "asc"
+    }
+  });
+
+  return sellers;
 }
 
 export async function listConversationsByUser(userId) {
