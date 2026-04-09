@@ -1,7 +1,24 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, NavLink } from "react-router-dom";
+import { fetchMyConversations } from "../../lib/chatApi";
+import { getAccessToken, getAuthUser } from "../../lib/authStorage";
 
 export default function PageShell({ title, children }) {
+  const token = getAccessToken();
+  const authUser = getAuthUser();
+
+  const chatConversationsQuery = useQuery({
+    queryKey: ["chat-conversations"],
+    queryFn: fetchMyConversations,
+    enabled: Boolean(token && authUser)
+  });
+
+  const chatUnreadCount = (chatConversationsQuery.data || []).reduce(
+    (sum, conversation) => sum + (conversation.unreadCount || 0),
+    0
+  );
+
   const themes = [
     { id: "luxury-gold", label: "Luxury Gold" },
     { id: "ocean-steel", label: "Ocean Steel" },
@@ -81,7 +98,14 @@ export default function PageShell({ title, children }) {
               key={item.to}
               to={item.to}
             >
-              {item.label}
+              <span className="inline-flex items-center gap-1">
+                {item.label}
+                {item.to === "/chat" && chatUnreadCount > 0 ? (
+                  <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                    {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+                  </span>
+                ) : null}
+              </span>
             </NavLink>
           ))}
         </nav>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import { fetchMe } from "../lib/authApi";
 import { clearAuthSession } from "../lib/authStorage";
+import { fetchMyConversations } from "../lib/chatApi";
 import { fetchMyOrders } from "../lib/ordersApi";
 import { fetchMyNotifications, markNotificationRead } from "../lib/notificationsApi";
 
@@ -22,6 +23,13 @@ export default function ProfilePage() {
     queryKey: ["my-notifications"],
     queryFn: fetchMyNotifications
   });
+
+  const chatQuery = useQuery({
+    queryKey: ["chat-conversations"],
+    queryFn: fetchMyConversations
+  });
+
+  const unreadChatCount = (chatQuery.data || []).reduce((sum, item) => sum + (item.unreadCount || 0), 0);
 
   const readMutation = useMutation({
     mutationFn: markNotificationRead,
@@ -46,6 +54,10 @@ export default function ProfilePage() {
             <p className="text-slate-700"><strong>Name:</strong> {profileQuery.data.fullName}</p>
             <p className="text-slate-700"><strong>Email:</strong> {profileQuery.data.email}</p>
             <p className="text-slate-700"><strong>Role:</strong> {profileQuery.data.role}</p>
+            <p className="text-slate-700">
+              <strong>Chat Unread:</strong> {unreadChatCount}
+              {unreadChatCount > 0 ? <Link className="ml-2 text-xs text-blue-700 underline" to="/chat">Open Chat</Link> : null}
+            </p>
             <button className="wm-btn-secondary rounded-full px-4" type="button" onClick={onLogout}>Logout</button>
           </div>
 

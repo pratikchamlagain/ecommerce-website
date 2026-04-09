@@ -40,6 +40,7 @@ export default function ChatPage() {
   const [messageDraft, setMessageDraft] = useState("");
   const [formError, setFormError] = useState("");
   const [escalationFeedback, setEscalationFeedback] = useState("");
+  const [conversationFilter, setConversationFilter] = useState("all");
 
   const conversationsQuery = useQuery({
     queryKey: ["chat-conversations"],
@@ -52,9 +53,21 @@ export default function ChatPage() {
   });
 
   const conversations = conversationsQuery.data || [];
-  const activeConversationId = selectedConversationId || conversations[0]?.id || "";
+  const filteredConversations = conversations.filter((conversation) => {
+    if (conversationFilter === "order-linked") {
+      return Boolean(conversation.orderId);
+    }
 
-  const selectedConversation = conversations.find((item) => item.id === activeConversationId) || null;
+    if (conversationFilter === "open-escalations") {
+      const roles = new Set((conversation.members || []).map((member) => member.role));
+      return Boolean(conversation.orderId) && roles.has("CUSTOMER") && roles.has("SELLER") && roles.has("ADMIN");
+    }
+
+    return true;
+  });
+  const activeConversationId = selectedConversationId || filteredConversations[0]?.id || "";
+
+  const selectedConversation = filteredConversations.find((item) => item.id === activeConversationId) || null;
   const contacts = contactsQuery.data || [];
   const hasSelectedContact = contacts.some((contact) => contact.id === newParticipantId);
 
@@ -235,9 +248,23 @@ export default function ChatPage() {
               ))}
             </select>
             {contactOrdersQuery.isPending ? <p className="m-0 text-xs text-slate-500">Loading related orders...</p> : null}
-            {contactOrdersQuery.isError ? <p className="m-0 text-xs text-rose-600">Could not load related orders.</p> : null}
+            {contactOrdersQuery.isError ? (
+              <div>
+                <p className="m-0 text-xs text-rose-600">Could not load related orders.</p>
+                <button className="wm-btn-secondary mt-1 px-2 py-1 text-xs" type="button" onClick={() => contactOrdersQuery.refetch()}>
+                  Retry
+                </button>
+              </div>
+            ) : null}
             {contactsQuery.isPending ? <p className="m-0 text-xs text-slate-500">Loading contacts...</p> : null}
-            {contactsQuery.isError ? <p className="m-0 text-xs text-rose-600">Could not load contacts.</p> : null}
+            {contactsQuery.isError ? (
+              <div>
+                <p className="m-0 text-xs text-rose-600">Could not load contacts.</p>
+                <button className="wm-btn-secondary mt-1 px-2 py-1 text-xs" type="button" onClick={() => contactsQuery.refetch()}>
+                  Retry
+                </button>
+              </div>
+            ) : null}
             {formError ? <p className="m-0 text-xs text-rose-600">{formError}</p> : null}
             <button className="wm-btn-primary" type="submit" disabled={createConversationMutation.isPending}>
               {createConversationMutation.isPending ? "Creating..." : "Create / Open"}
@@ -245,11 +272,35 @@ export default function ChatPage() {
           </form>
 
           <h4 className="m-0 mt-5 text-base text-slate-900">My Conversations</h4>
+          <select
+            className="wm-input mt-2"
+            value={conversationFilter}
+            onChange={(event) => {
+              setConversationFilter(event.target.value);
+              setSelectedConversationId("");
+            }}
+          >
+            <option value="all">All Conversations</option>
+            <option value="order-linked">Order-linked only</option>
+            {(authUser?.role === "SELLER" || authUser?.role === "ADMIN") ? (
+              <option value="open-escalations">Open escalations</option>
+            ) : null}
+          </select>
           {conversationsQuery.isPending ? <p className="wm-muted mt-2">Loading conversations...</p> : null}
-          {conversationsQuery.isError ? <p className="mt-2 text-sm text-rose-600">Could not load conversations.</p> : null}
+          {conversationsQuery.isError ? (
+            <div className="mt-2">
+              <p className="m-0 text-sm text-rose-600">Could not load conversations.</p>
+              <button className="wm-btn-secondary mt-2 px-3 py-1 text-xs" type="button" onClick={() => conversationsQuery.refetch()}>
+                Retry
+              </button>
+            </div>
+          ) : null}
+          {!conversationsQuery.isPending && !conversationsQuery.isError && filteredConversations.length === 0 ? (
+            <p className="wm-muted mt-2">No conversations found for this filter.</p>
+          ) : null}
 
           <div className="mt-2 grid gap-2">
-            {(conversationsQuery.data || []).map((conversation) => (
+            {filteredConversations.map((conversation) => (
               <button
                 className={activeConversationId === conversation.id
                   ? "rounded-lg border border-slate-900 bg-slate-900 p-3 text-left text-white"
@@ -301,7 +352,17 @@ export default function ChatPage() {
 
               <div className="mt-3 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3">
                 {messagesQuery.isPending ? <p className="wm-muted">Loading messages...</p> : null}
-                {messagesQuery.isError ? <p className="text-sm text-rose-600">Could not load messages.</p> : null}
+                {messagesQuery.isError ? (
+                  <div>
+                    <p className="m-0 text-sm text-rose-600">Could not load messages.</p>
+                    <button className="wm-btn-secondary mt-2 px-3 py-1 text-xs" type="button" onClick={() => messagesQuery.refetch()}>
+                      Retry
+                    </button>
+                  </div>
+                ) : null}
+                {!messagesQuery.isPending && !messagesQuery.isError && (messagesQuery.data || []).length === 0 ? (
+                  <p className="wm-muted">No messages yet. Start the conversation below.</p>
+                ) : null}
 
                 <div className="grid gap-2">
                   {(messagesQuery.data || []).map((message) => {

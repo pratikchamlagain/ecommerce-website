@@ -16,6 +16,14 @@ npm install
 npm run dev
 ```
 
+## Run Frontend E2E Tests
+
+```bash
+cd frontend
+npx playwright install chromium
+npm run e2e
+```
+
 ## Run Backend
 
 ```bash

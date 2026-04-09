@@ -11,6 +11,8 @@ import notificationsRouter from "./modules/notifications/notifications.routes.js
 import chatRouter from "./modules/chat/chat.routes.js";
 import sellerProductsRouter from "./modules/sellerProducts/sellerProducts.routes.js";
 import adminRouter from "./modules/admin/admin.routes.js";
+import prisma from "./config/prisma.js";
+import { logger } from "./utils/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -47,6 +49,30 @@ app.get("/api/v1/health", (_req, res) => {
     service: "watchmatrix-api",
     timestamp: new Date().toISOString()
   });
+});
+
+app.get("/api/v1/health/ready", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+
+    return res.status(200).json({
+      ok: true,
+      service: "watchmatrix-api",
+      status: "ready",
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.alert("Readiness check failed", {
+      message: error?.message
+    });
+
+    return res.status(503).json({
+      ok: false,
+      service: "watchmatrix-api",
+      status: "degraded",
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 app.use("/api/v1/auth", authRouter);
