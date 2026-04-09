@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import {
   createConversation,
+  escalateConversation,
   fetchChatContacts,
   fetchContactChatOrders,
   fetchConversationMessages,
@@ -38,6 +39,7 @@ export default function ChatPage() {
   const [newOrderId, setNewOrderId] = useState(searchParams.get("orderId") || "");
   const [messageDraft, setMessageDraft] = useState("");
   const [formError, setFormError] = useState("");
+  const [escalationFeedback, setEscalationFeedback] = useState("");
 
   const conversationsQuery = useQuery({
     queryKey: ["chat-conversations"],
@@ -99,6 +101,26 @@ export default function ChatPage() {
       queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
     }
   });
+
+  const escalationMutation = useMutation({
+    mutationFn: escalateConversation,
+    onSuccess: (data) => {
+      setEscalationFeedback(data.escalated ? "Escalation sent to admin." : "Conversation already has admin.");
+      queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
+    },
+    onError: (error) => {
+      setEscalationFeedback(error?.response?.data?.message || "Could not escalate this conversation.");
+    }
+  });
+
+  const memberRoles = new Set((selectedConversation?.members || []).map((member) => member.role));
+  const canEscalateConversation = Boolean(
+    selectedConversation &&
+    (authUser?.role === "CUSTOMER" || authUser?.role === "SELLER") &&
+    memberRoles.has("CUSTOMER") &&
+    memberRoles.has("SELLER") &&
+    !memberRoles.has("ADMIN")
+  );
 
   useEffect(() => {
     if (!token) {
@@ -258,6 +280,23 @@ export default function ChatPage() {
                 <p className="m-0 mt-1 text-xs text-slate-600">
                   Members: {selectedConversation.members.map((member) => member.fullName).join(", ")}
                 </p>
+                {canEscalateConversation ? (
+                  <div className="mt-2">
+                    <button
+                      className="wm-btn-secondary px-3 py-1 text-xs"
+                      type="button"
+                      disabled={escalationMutation.isPending}
+                      onClick={() => {
+                        setEscalationFeedback("");
+                        escalationMutation.mutate(selectedConversation.id);
+                      }}
+                    >
+                      {escalationMutation.isPending ? "Escalating..." : "Escalate To Admin"}
+                    </button>
+                  </div>
+                ) : null}
+                {memberRoles.has("ADMIN") ? <p className="m-0 mt-2 text-xs text-emerald-700">Admin is already in this conversation.</p> : null}
+                {escalationFeedback ? <p className="m-0 mt-2 text-xs text-slate-700">{escalationFeedback}</p> : null}
               </div>
 
               <div className="mt-3 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3">

@@ -621,3 +621,128 @@ export async function markConversationRead(userId, conversationId) {
     markedRead: true
   };
 }
+
+export async function escalateConversationToAdmin(userId, conversationId) {
+  const conversation = await prisma.conversation.findUnique({
+    where: {
+      id: conversationId
+    },
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              fullName: true,
+              role: true,
+              isActive: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!conversation) {
+    const err = new Error("Conversation not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const requesterMember = conversation.members.find((member) => member.userId === userId);
+  if (!requesterMember) {
+    const err = new Error("Conversation not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const requesterRole = requesterMember.user.role;
+  if (!["CUSTOMER", "SELLER"].includes(requesterRole)) {
+    const err = new Error("Only customer or seller can request escalation");
+    err.statusCode = 403;
+    throw err;
+  }
+
+  const rolesInConversation = new Set(conversation.members.map((member) => member.user.role));
+  const hasSeller = rolesInConversation.has("SELLER");
+  const hasCustomer = rolesInConversation.has("CUSTOMER");
+  const hasAdmin = rolesInConversation.has("ADMIN");
+
+  if (!hasSeller || !hasCustomer) {
+    const err = new Error("Escalation requires a customer-seller conversation");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (hasAdmin) {
+    return {
+      conversationId,
+      escalated: false,
+      message: "Conversation already includes an admin"
+    };
+  }
+
+  const admin = await prisma.user.findFirst({
+    where: {
+      role: "ADMIN",
+      isActive: true
+    },
+    orderBy: {
+      createdAt: "asc"
+    },
+    select: {
+      id: true,
+      fullName: true
+    }
+  });
+
+  if (!admin) {
+    const err = new Error("No active admin available for escalation");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.conversationMember.createMany({
+      data: [
+        {
+          conversationId,
+          userId: admin.id
+        }
+      ],
+      skipDuplicates: true
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: admin.id,
+        type: "CHAT_ESCALATION_REQUESTED",
+        title: "Chat escalation requested",
+        message: `${requesterMember.user.fullName} requested admin escalation in conversation ${conversationId.slice(0, 8)}.`,
+        metadata: {
+          conversationId,
+          requestedByUserId: userId,
+          orderId: conversation.orderId
+        }
+      }
+    });
+  });
+
+  const memberIds = Array.from(
+    new Set([
+      ...conversation.members.map((member) => member.userId),
+      admin.id
+    ])
+  );
+
+  emitUsersEvent(memberIds, "chat:conversation-updated", {
+    conversationId
+  });
+
+  return {
+    conversationId,
+    escalated: true,
+    adminId: admin.id,
+    adminName: admin.fullName
+  };
+}

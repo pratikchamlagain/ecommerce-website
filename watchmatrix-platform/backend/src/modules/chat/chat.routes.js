@@ -3,6 +3,7 @@ import { requireAuth } from "../../middlewares/auth.js";
 import {
   contacts,
   contactOrders,
+  escalateConversation,
   conversations,
   createConversation,
   messages,
@@ -20,5 +21,6 @@ chatRouter.post("/conversations", createConversation);
 chatRouter.get("/conversations/:conversationId/messages", messages);
 chatRouter.post("/conversations/:conversationId/messages", sendMessage);
 chatRouter.patch("/conversations/:conversationId/read", readConversation);
+chatRouter.post("/conversations/:conversationId/escalate", escalateConversation);
 
 export default chatRouter;

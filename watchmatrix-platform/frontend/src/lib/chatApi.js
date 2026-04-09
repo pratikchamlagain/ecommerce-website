@@ -34,3 +34,8 @@ export async function markConversationRead(conversationId) {
   const response = await apiClient.patch(`/chat/conversations/${conversationId}/read`);
   return response.data.data;
 }
+
+export async function escalateConversation(conversationId) {
+  const response = await apiClient.post(`/chat/conversations/${conversationId}/escalate`);
+  return response.data.data;
+}
