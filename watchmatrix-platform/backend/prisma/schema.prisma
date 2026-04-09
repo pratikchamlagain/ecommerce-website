@@ -29,6 +29,9 @@ model User {
   adminTargetLogs AdminAuditLog[] @relation("AdminTargetLogs")
   sellerFulfillmentLogs SellerFulfillmentLog[]
   notifications Notification[]
+  chatMemberships ConversationMember[]
+  createdConversations Conversation[]
+  sentMessages Message[] @relation("MessageSender")
 }
 
 enum UserRole {
@@ -106,6 +109,7 @@ model Order {
 
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items         OrderItem[]
+  conversations Conversation[]
 }
 
 model OrderItem {
@@ -173,4 +177,53 @@ model Notification {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id          String               @id @default(cuid())
+  type        ConversationType
+  orderId     String?
+  createdById String
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  createdBy   User                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  order       Order?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  members     ConversationMember[]
+  messages    Message[]
+
+  @@index([orderId])
+}
+
+enum ConversationType {
+  DIRECT
+  ORDER_SUPPORT
+}
+
+model ConversationMember {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
 }
