@@ -2,6 +2,7 @@ import {
   contactOrdersParamsSchema,
   conversationParamsSchema,
   createConversationSchema,
+  listEscalationsQuerySchema,
   listMessagesQuerySchema,
   sendMessageSchema
 } from "./chat.schema.js";
@@ -9,6 +10,7 @@ import {
   createOrGetConversation,
   escalateConversationToAdmin,
   listContactOrderLinks,
+  listEscalationsForAdmin,
   listAllowedChatContacts,
   listConversationsByUser,
   listMessagesByConversation,
@@ -160,6 +162,32 @@ export async function escalateConversation(req, res, next) {
   try {
     const { conversationId } = conversationParamsSchema.parse(req.params);
     const data = await escalateConversationToAdmin(req.user.sub, conversationId);
+
+    return res.status(200).json({
+      ok: true,
+      data
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
+    return next(error);
+  }
+}
+
+export async function escalations(req, res, next) {
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res.status(403).json({ ok: false, message: "Forbidden" });
+    }
+
+    const query = listEscalationsQuerySchema.parse(req.query);
+    const data = await listEscalationsForAdmin(req.user.sub, query);
 
     return res.status(200).json({
       ok: true,

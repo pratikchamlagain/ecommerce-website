@@ -34,7 +34,7 @@ export default function ChatPage() {
   const token = getAccessToken();
   const [searchParams] = useSearchParams();
 
-  const [selectedConversationId, setSelectedConversationId] = useState("");
+  const [selectedConversationId, setSelectedConversationId] = useState(searchParams.get("conversationId") || "");
   const [newParticipantId, setNewParticipantId] = useState(searchParams.get("participantId") || "");
   const [newOrderId, setNewOrderId] = useState(searchParams.get("orderId") || "");
   const [messageDraft, setMessageDraft] = useState("");

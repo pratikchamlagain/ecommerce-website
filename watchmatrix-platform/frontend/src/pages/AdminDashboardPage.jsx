@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import {
+  fetchAdminChatEscalations,
   fetchAdminAuditLogs,
   fetchAdminOrders,
   fetchAdminOverview,
@@ -57,6 +58,11 @@ export default function AdminDashboardPage() {
   const auditLogsQuery = useQuery({
     queryKey: ["admin-audit-logs"],
     queryFn: () => fetchAdminAuditLogs({ page: 1, limit: 8 })
+  });
+
+  const escalationsQuery = useQuery({
+    queryKey: ["admin-chat-escalations"],
+    queryFn: () => fetchAdminChatEscalations({ page: 1, limit: 8 })
   });
 
   const ordersQuery = useQuery({
@@ -392,6 +398,62 @@ export default function AdminDashboardPage() {
               </div>
             ) : null}
           </>
+        ) : null}
+      </section>
+
+      <section className="wm-card mt-6 p-5">
+        <h3 className="m-0 text-xl text-slate-900">Chat Escalations</h3>
+        <p className="m-0 mt-1 text-sm text-slate-600">Recent customer-seller chat escalations that requested admin attention.</p>
+
+        {escalationsQuery.isPending ? <p className="wm-muted mt-3">Loading chat escalations...</p> : null}
+        {escalationsQuery.isError ? <p className="mt-3 text-sm text-rose-600">Could not load chat escalations.</p> : null}
+
+        {!escalationsQuery.isPending && !escalationsQuery.isError && (escalationsQuery.data?.items || []).length === 0 ? (
+          <p className="wm-muted mt-3">No chat escalations yet.</p>
+        ) : null}
+
+        {(escalationsQuery.data?.items || []).length > 0 ? (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[860px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-left text-slate-500">
+                  <th className="py-2 pr-3 font-semibold">Time</th>
+                  <th className="py-2 pr-3 font-semibold">Requested By</th>
+                  <th className="py-2 pr-3 font-semibold">Conversation</th>
+                  <th className="py-2 pr-3 font-semibold">Order</th>
+                  <th className="py-2 pr-3 font-semibold">Participants</th>
+                  <th className="py-2 pr-3 font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(escalationsQuery.data?.items || []).map((item) => (
+                  <tr className="border-b border-slate-100" key={item.id}>
+                    <td className="py-2 pr-3 text-slate-600">{new Date(item.createdAt).toLocaleString()}</td>
+                    <td className="py-2 pr-3 text-slate-900">
+                      {item.requester?.fullName || "Unknown"}
+                      {item.requester?.role ? <span className="ml-1 text-xs text-slate-500">({item.requester.role})</span> : null}
+                    </td>
+                    <td className="py-2 pr-3 text-slate-700">{item.conversationId ? `#${item.conversationId.slice(0, 8)}` : "-"}</td>
+                    <td className="py-2 pr-3 text-slate-700">{item.orderId ? `#${item.orderId.slice(0, 8)}` : "-"}</td>
+                    <td className="py-2 pr-3 text-slate-600">
+                      {(item.participants || [])
+                        .map((participant) => `${participant.fullName} (${participant.role})`)
+                        .join(", ") || "-"}
+                    </td>
+                    <td className="py-2 pr-3">
+                      {item.conversationId ? (
+                        <Link className="wm-btn-secondary px-3 py-1 text-xs" to={`/chat?conversationId=${item.conversationId}`}>
+                          Open Chat
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-slate-500">Unavailable</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : null}
       </section>
 

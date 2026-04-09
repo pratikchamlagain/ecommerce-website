@@ -34,3 +34,8 @@ export async function fetchAdminOrderById(orderId) {
   const response = await apiClient.get(`/admin/orders/${orderId}`);
   return response.data.data;
 }
+
+export async function fetchAdminChatEscalations(params = {}) {
+  const response = await apiClient.get("/chat/escalations", { params });
+  return response.data.data;
+}

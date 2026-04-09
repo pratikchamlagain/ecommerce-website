@@ -746,3 +746,115 @@ export async function escalateConversationToAdmin(userId, conversationId) {
     adminName: admin.fullName
   };
 }
+
+export async function listEscalationsForAdmin(adminUserId, query) {
+  const skip = (query.page - 1) * query.limit;
+
+  const [total, notifications] = await Promise.all([
+    prisma.notification.count({
+      where: {
+        userId: adminUserId,
+        type: "CHAT_ESCALATION_REQUESTED"
+      }
+    }),
+    prisma.notification.findMany({
+      where: {
+        userId: adminUserId,
+        type: "CHAT_ESCALATION_REQUESTED"
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
+      skip,
+      take: query.limit,
+      select: {
+        id: true,
+        title: true,
+        message: true,
+        metadata: true,
+        createdAt: true
+      }
+    })
+  ]);
+
+  const conversationIds = [];
+  const requesterIds = [];
+
+  for (const item of notifications) {
+    const metadata = item.metadata || {};
+    if (metadata.conversationId) {
+      conversationIds.push(metadata.conversationId);
+    }
+    if (metadata.requestedByUserId) {
+      requesterIds.push(metadata.requestedByUserId);
+    }
+  }
+
+  const [requesters, conversations] = await Promise.all([
+    requesterIds.length > 0
+      ? prisma.user.findMany({
+          where: {
+            id: { in: Array.from(new Set(requesterIds)) }
+          },
+          select: {
+            id: true,
+            fullName: true,
+            role: true,
+            email: true
+          }
+        })
+      : Promise.resolve([]),
+    conversationIds.length > 0
+      ? prisma.conversation.findMany({
+          where: {
+            id: { in: Array.from(new Set(conversationIds)) }
+          },
+          include: {
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    role: true
+                  }
+                }
+              }
+            }
+          }
+        })
+      : Promise.resolve([])
+  ]);
+
+  const requesterMap = new Map(requesters.map((user) => [user.id, user]));
+  const conversationMap = new Map(conversations.map((conversation) => [conversation.id, conversation]));
+
+  return {
+    items: notifications.map((item) => {
+      const metadata = item.metadata || {};
+      const requester = requesterMap.get(metadata.requestedByUserId) || null;
+      const conversation = conversationMap.get(metadata.conversationId) || null;
+
+      return {
+        id: item.id,
+        title: item.title,
+        message: item.message,
+        createdAt: item.createdAt,
+        conversationId: metadata.conversationId || null,
+        orderId: metadata.orderId || conversation?.orderId || null,
+        requester,
+        participants: (conversation?.members || []).map((member) => ({
+          id: member.user.id,
+          fullName: member.user.fullName,
+          role: member.user.role
+        }))
+      };
+    }),
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / query.limit))
+    }
+  };
+}

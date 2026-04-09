@@ -4,6 +4,7 @@ import {
   contacts,
   contactOrders,
   escalateConversation,
+  escalations,
   conversations,
   createConversation,
   messages,
@@ -16,6 +17,7 @@ const chatRouter = Router();
 chatRouter.use(requireAuth);
 chatRouter.get("/contacts", contacts);
 chatRouter.get("/contacts/:contactId/orders", contactOrders);
+chatRouter.get("/escalations", escalations);
 chatRouter.get("/conversations", conversations);
 chatRouter.post("/conversations", createConversation);
 chatRouter.get("/conversations/:conversationId/messages", messages);
