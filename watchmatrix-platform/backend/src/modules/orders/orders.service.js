@@ -24,6 +24,7 @@ function toPublicOrder(order) {
     items: order.items.map((item) => ({
       id: item.id,
       productId: item.productId,
+      sellerId: item.product?.sellerId || null,
       productName: item.productName,
       productBrand: item.productBrand,
       quantity: item.quantity,
@@ -165,7 +166,15 @@ export async function listOrdersByUser(userId) {
   const orders = await prisma.order.findMany({
     where: { userId },
     include: {
-      items: true
+      items: {
+        include: {
+          product: {
+            select: {
+              sellerId: true
+            }
+          }
+        }
+      }
     },
     orderBy: {
       createdAt: "desc"
@@ -182,7 +191,15 @@ export async function getOrderByIdForUser(userId, orderId) {
       userId
     },
     include: {
-      items: true
+      items: {
+        include: {
+          product: {
+            select: {
+              sellerId: true
+            }
+          }
+        }
+      }
     }
   });
 
@@ -305,7 +322,15 @@ export async function cancelOrderByUser(userId, orderId) {
       userId
     },
     include: {
-      items: true
+      items: {
+        include: {
+          product: {
+            select: {
+              sellerId: true
+            }
+          }
+        }
+      }
     }
   });
 

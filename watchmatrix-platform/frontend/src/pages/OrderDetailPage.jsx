@@ -109,6 +109,17 @@ export default function OrderDetailPage() {
                   </p>
                   <p className="m-0 text-sm font-semibold text-slate-900">Subtotal: Rs. {Number(item.subtotal).toFixed(2)}</p>
 
+                  {item.sellerId ? (
+                    <div className="mt-2">
+                      <Link
+                        className="wm-btn-secondary px-3 py-1 text-xs"
+                        to={`/chat?participantId=${item.sellerId}&orderId=${order.id}`}
+                      >
+                        Chat Seller
+                      </Link>
+                    </div>
+                  ) : null}
+
                   <div className="mt-2">
                     <span className={getStatusChipClass(item.sellerStatus || "PENDING")}>{item.sellerStatus || "PENDING"}</span>
                   </div>

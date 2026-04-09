@@ -14,6 +14,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProfilePage from "../pages/ProfilePage";
+import ChatPage from "../pages/ChatPage";
 import RequireAuth from "./RequireAuth";
 
 export const router = createBrowserRouter([
@@ -63,6 +64,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <ProfilePage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/chat",
+    element: (
+      <RequireAuth>
+        <ChatPage />
       </RequireAuth>
     )
   },

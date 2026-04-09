@@ -7,6 +7,7 @@ import productsRouter from "./modules/products/products.routes.js";
 import cartRouter from "./modules/cart/cart.routes.js";
 import ordersRouter from "./modules/orders/orders.routes.js";
 import notificationsRouter from "./modules/notifications/notifications.routes.js";
+import chatRouter from "./modules/chat/chat.routes.js";
 import sellerProductsRouter from "./modules/sellerProducts/sellerProducts.routes.js";
 import adminRouter from "./modules/admin/admin.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -32,6 +33,7 @@ app.use("/api/v1/products", productsRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/orders", ordersRouter);
 app.use("/api/v1/notifications", notificationsRouter);
+app.use("/api/v1/chat", chatRouter);
 app.use("/api/v1/seller", sellerProductsRouter);
 app.use("/api/v1/admin", adminRouter);
 

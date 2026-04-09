@@ -20,6 +20,7 @@ export default function PageShell({ title, children }) {
     { to: "/cart", label: "Cart" },
     { to: "/checkout", label: "Checkout" },
     { to: "/about", label: "About" },
+    { to: "/chat", label: "Chat" },
     { to: "/login", label: "Login" },
     { to: "/register", label: "Register" },
     { to: "/profile", label: "Profile" }
