@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { fetchMyConversations } from "../../lib/chatApi";
-import { getAccessToken, getAuthUser } from "../../lib/authStorage";
+import { clearAuthSession, getAccessToken, getAuthUser } from "../../lib/authStorage";
 
 export default function PageShell({ title, children }) {
+  const navigate = useNavigate();
   const token = getAccessToken();
   const authUser = getAuthUser();
+  const [search, setSearch] = useState("");
 
   const chatConversationsQuery = useQuery({
     queryKey: ["chat-conversations"],
@@ -25,28 +27,29 @@ export default function PageShell({ title, children }) {
     { id: "graphite-red", label: "Graphite Red" }
   ];
 
-  const quickLinks = [
-    { to: "/about", label: "Contact Us" },
-    { to: "/products?category=luxury&page=1", label: "Luxury Watches" },
-    { to: "/checkout", label: "Sell My Watch" }
-  ];
-
-  const navItems = [
+  const primaryNav = [
     { to: "/", label: "Home" },
-    { to: "/products", label: "Products" },
+    { to: "/products", label: "Shop" },
     { to: "/cart", label: "Cart" },
-    { to: "/checkout", label: "Checkout" },
-    { to: "/payments", label: "Payments" },
-    { to: "/about", label: "About" },
-    { to: "/chat", label: "Chat" },
-    { to: "/login", label: "Login" },
-    { to: "/register", label: "Register" },
-    { to: "/profile", label: "Profile" }
+    { to: "/checkout", label: "Checkout" }
   ];
 
-  if (authUser?.role === "ADMIN") {
-    navItems.splice(5, 0, { to: "/admin/payments", label: "Admin Payments" });
-  }
+  const supportNav = [
+    { to: "/payments", label: "Payments" },
+    { to: "/chat", label: "Chat" },
+    { to: "/about", label: "About" }
+  ];
+
+  const accountNav = token
+    ? [
+      { to: "/profile", label: "Profile" },
+      ...(authUser?.role === "SELLER" ? [{ to: "/seller/dashboard", label: "Seller" }] : []),
+      ...(authUser?.role === "ADMIN" ? [{ to: "/admin/dashboard", label: "Admin" }, { to: "/admin/payments", label: "Admin Payments" }] : [])
+    ]
+    : [
+      { to: "/login", label: "Login" },
+      { to: "/register", label: "Register" }
+    ];
 
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") {
@@ -61,26 +64,42 @@ export default function PageShell({ title, children }) {
     window.localStorage.setItem("wm-theme", theme);
   }, [theme]);
 
+  function onSearchSubmit(event) {
+    event.preventDefault();
+    const keyword = search.trim();
+    navigate(keyword ? `/products?search=${encodeURIComponent(keyword)}&page=1` : "/products?page=1");
+  }
+
+  function onLogout() {
+    clearAuthSession();
+    navigate("/login", { replace: true });
+  }
+
   return (
-    <div className="min-h-screen bg-[#f2f2f2] text-slate-900">
-      <header className="border-b border-black/10 bg-black text-white">
-        <p className="m-0 py-2 text-center text-sm font-medium tracking-wide">100% Certified Authentic</p>
+    <div className="min-h-screen text-slate-900">
+      <header className="border-b border-black/10 bg-[#111317] text-white">
+        <p className="m-0 py-2 text-center text-xs font-medium uppercase tracking-[0.2em]">Authenticated Luxury Watch Marketplace</p>
       </header>
 
-      <div className="border-b border-black/10 bg-white">
-        <div className="mx-auto flex w-[min(1320px,95%)] flex-wrap items-center justify-between gap-3 py-3">
-          <nav className="flex flex-wrap items-center gap-4 text-sm text-slate-700">
-            {quickLinks.map((item) => (
-              <Link className="hover:text-black" key={item.to} to={item.to}>{item.label}</Link>
-            ))}
-          </nav>
+      <div className="border-b border-black/10 bg-white/90 backdrop-blur">
+        <div className="mx-auto grid w-[min(1320px,95%)] gap-3 py-4 md:grid-cols-[auto_1fr_auto] md:items-center">
+          <Link className="text-4xl font-black tracking-[0.18em] text-slate-900" to="/">WM</Link>
 
-          <Link className="text-5xl font-black tracking-[0.08em] text-black" to="/">WM</Link>
+          <form className="flex gap-2" onSubmit={onSearchSubmit}>
+            <input
+              className="wm-input w-full"
+              placeholder="Search by brand, model, or category"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <button className="wm-btn-primary" type="submit">Search</button>
+          </form>
 
           <div className="flex flex-wrap items-center gap-2">
-            <input className="wm-input w-[220px] rounded-full" placeholder="Search watches" type="search" />
+            <Link className="wm-icon-btn" to="/products?category=luxury&page=1">Luxury</Link>
+            <Link className="wm-icon-btn" to="/checkout">Sell</Link>
             <Link className="wm-icon-btn" to="/cart">Bag</Link>
-            <Link className="wm-icon-btn" to="/profile">Account</Link>
             <select
               className="wm-input rounded-full px-3 py-2 text-xs"
               id="theme-select"
@@ -96,24 +115,50 @@ export default function PageShell({ title, children }) {
       </div>
 
       <div className="border-b border-black/10 bg-white">
-        <nav className="mx-auto flex w-[min(1320px,95%)] flex-wrap gap-2 py-2 text-sm">
-          {navItems.map((item) => (
-            <NavLink
-              className={({ isActive }) => (isActive ? "wm-nav-link wm-nav-link-active" : "wm-nav-link")}
-              key={item.to}
-              to={item.to}
-            >
-              <span className="inline-flex items-center gap-1">
+        <div className="mx-auto grid w-[min(1320px,95%)] gap-3 py-3 md:grid-cols-[1fr_auto] md:items-center">
+          <nav className="flex flex-wrap items-center gap-2 text-sm">
+            {primaryNav.map((item) => (
+              <NavLink
+                className={({ isActive }) => (isActive ? "wm-nav-link wm-nav-link-active" : "wm-nav-link")}
+                key={item.to}
+                to={item.to}
+              >
                 {item.label}
-                {item.to === "/chat" && chatUnreadCount > 0 ? (
-                  <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                    {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
-                  </span>
-                ) : null}
-              </span>
-            </NavLink>
-          ))}
-        </nav>
+              </NavLink>
+            ))}
+            {supportNav.map((item) => (
+              <NavLink
+                className={({ isActive }) => (isActive ? "wm-nav-link wm-nav-link-active" : "wm-nav-link")}
+                key={item.to}
+                to={item.to}
+              >
+                <span className="inline-flex items-center gap-1">
+                  {item.label}
+                  {item.to === "/chat" && chatUnreadCount > 0 ? (
+                    <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+                    </span>
+                  ) : null}
+                </span>
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
+            {accountNav.map((item) => (
+              <NavLink
+                className={({ isActive }) => (isActive ? "wm-nav-link wm-nav-link-active" : "wm-nav-link")}
+                key={item.to}
+                to={item.to}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+            {token ? (
+              <button className="wm-btn-secondary px-3 py-1.5 text-sm" type="button" onClick={onLogout}>Logout</button>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <main className="pb-12 pt-6">
@@ -123,7 +168,7 @@ export default function PageShell({ title, children }) {
         </section>
       </main>
 
-      <footer className="bg-[#2f3238] py-10 text-slate-100">
+      <footer className="bg-[#1b1e24] py-10 text-slate-100">
         <div className="mx-auto grid w-[min(1320px,95%)] gap-6 text-sm md:grid-cols-4">
           <div>
             <p className="mb-2 text-lg font-semibold">WatchMatrix HQ</p>

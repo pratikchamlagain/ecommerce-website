@@ -207,12 +207,12 @@ export default function ChatPage() {
   }
 
   return (
-    <PageShell title="Live Chat">
-      <section className="grid gap-5 lg:grid-cols-[340px_1fr]">
+    <PageShell title="Support Chat Center">
+      <section className="grid gap-5 lg:grid-cols-[360px_1fr]">
         <aside className="wm-card p-4">
-          <h3 className="m-0 text-lg text-slate-900">Start Conversation</h3>
+          <h3 className="m-0 text-lg text-slate-900">Start or Continue a Conversation</h3>
           <p className="m-0 mt-1 text-xs text-slate-600">
-            Customer can chat with seller. Seller can chat with customer and admin. Admin can chat with seller.
+            Chat is role-aware and order-aware. Create a thread with a contact, optionally linked to an order.
           </p>
           <form className="mt-3 grid gap-2" onSubmit={onCreateConversation}>
             <select
@@ -271,7 +271,7 @@ export default function ChatPage() {
             </button>
           </form>
 
-          <h4 className="m-0 mt-5 text-base text-slate-900">My Conversations</h4>
+          <h4 className="m-0 mt-5 text-base text-slate-900">Conversation Inbox</h4>
           <select
             className="wm-input mt-2"
             value={conversationFilter}
@@ -299,7 +299,7 @@ export default function ChatPage() {
             <p className="wm-muted mt-2">No conversations found for this filter.</p>
           ) : null}
 
-          <div className="mt-2 grid gap-2">
+          <div className="mt-2 grid gap-2 max-h-[430px] overflow-y-auto pr-1">
             {filteredConversations.map((conversation) => (
               <button
                 className={activeConversationId === conversation.id
@@ -350,7 +350,7 @@ export default function ChatPage() {
                 {escalationFeedback ? <p className="m-0 mt-2 text-xs text-slate-700">{escalationFeedback}</p> : null}
               </div>
 
-              <div className="mt-3 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3">
+              <div className="mt-3 flex-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3">
                 {messagesQuery.isPending ? <p className="wm-muted">Loading messages...</p> : null}
                 {messagesQuery.isError ? (
                   <div>
@@ -383,10 +383,10 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              <form className="mt-3 flex gap-2" onSubmit={onSendMessage}>
+              <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={onSendMessage}>
                 <input
                   className="wm-input flex-1"
-                  placeholder="Type your message..."
+                  placeholder="Type your message and press send"
                   value={messageDraft}
                   onChange={(event) => setMessageDraft(event.target.value)}
                 />

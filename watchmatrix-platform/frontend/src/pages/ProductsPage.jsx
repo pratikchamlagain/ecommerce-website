@@ -201,8 +201,8 @@ export default function ProductsPage() {
         </div>
       </form>
 
-      {productsQuery.isPending ? <p className="text-slate-300">Loading products...</p> : null}
-      {productsQuery.isError ? <p className="text-rose-300">Failed to load products.</p> : null}
+      {productsQuery.isPending ? <p className="text-slate-600">Loading products...</p> : null}
+      {productsQuery.isError ? <p className="text-rose-600">Failed to load products.</p> : null}
 
       {!productsQuery.isPending && !productsQuery.isError && products.length === 0 ? (
         <p className="wm-panel wm-muted">No products found yet. Add data or adjust filters.</p>
@@ -211,16 +211,16 @@ export default function ProductsPage() {
       {category && selectedCategoryGallery.length > 0 ? (
         <section className="wm-panel mb-4">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h3 className="m-0 text-xl text-white">
+            <h3 className="m-0 text-xl text-slate-900">
               {category[0].toUpperCase() + category.slice(1)} Legacy Collection ({selectedCategoryGallery.length} images)
             </h3>
-            <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Recovered order from legacy folders</span>
+            <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Recovered order from legacy folders</span>
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
             {selectedCategoryGallery.map((image, index) => (
               <img
-                className="h-28 w-full rounded-xl bg-slate-800 object-cover"
+                className="h-28 w-full rounded-xl object-cover"
                 key={`${category}-legacy-${index}`}
                 src={image}
                 alt={`${category} legacy watch ${index + 1}`}
@@ -233,21 +233,22 @@ export default function ProductsPage() {
 
       <section className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
         {products.map((product) => (
-          <article className="wm-card overflow-hidden p-3 shadow-xl shadow-black/20" key={product.id}>
+          <article className="wm-card overflow-hidden p-3" key={product.id}>
             <Link to={`/products/${product.slug}`}>
-              <img
-                className="h-48 w-full rounded-xl bg-slate-800 object-cover"
-                src={resolveProductImage(product)}
-                alt={product.name}
-                loading="lazy"
-                onError={(event) => onProductImageError(event, product)}
-              />
+              <div className="wm-image-frame h-48">
+                <img
+                  src={resolveProductImage(product)}
+                  alt={product.name}
+                  loading="lazy"
+                  onError={(event) => onProductImageError(event, product)}
+                />
+              </div>
             </Link>
-            <h3 className="mb-1 mt-3 text-base font-semibold text-white">
+            <h3 className="mb-1 mt-3 text-base font-semibold text-slate-900">
               <Link className="hover:underline" to={`/products/${product.slug}`}>{product.name}</Link>
             </h3>
-            <p className="my-1 text-sm text-slate-400">{product.brand}</p>
-            <p className="my-1 text-sm text-slate-400">{product.category?.name || "Uncategorized"}</p>
+            <p className="my-1 text-sm text-slate-600">{product.brand}</p>
+            <p className="my-1 text-sm text-slate-600">{product.category?.name || "Uncategorized"}</p>
             <p className="wm-price mt-2 font-bold">Rs. {Number(product.price).toFixed(2)}</p>
           </article>
         ))}
@@ -267,7 +268,7 @@ export default function ProductsPage() {
           >
             Previous
           </button>
-          <span className="text-sm text-slate-300">
+          <span className="text-sm text-slate-600">
             Page {pagination.page} of {pagination.totalPages}
           </span>
           <button

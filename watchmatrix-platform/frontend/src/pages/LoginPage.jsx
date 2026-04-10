@@ -33,38 +33,50 @@ export default function LoginPage() {
   }
 
   return (
-    <PageShell title="Login">
-      <form className="wm-panel mb-4 grid max-w-[440px] gap-2" onSubmit={onSubmit}>
-        <label className="text-sm font-medium text-slate-200" htmlFor="email">Email</label>
-        <input
-          className="wm-input"
-          id="email"
-          type="email"
-          value={form.email}
-          onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-          required
-        />
+    <PageShell title="Welcome Back">
+      <section className="wm-auth-layout">
+        <article className="wm-auth-side">
+          <p className="m-0 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Account Access</p>
+          <h3 className="mb-0 mt-2 text-3xl text-slate-900">Sign in to continue shopping and managing orders</h3>
+          <ul className="mb-0 mt-5 grid gap-2 text-sm text-slate-700">
+            <li>Track current orders and payment records</li>
+            <li>Continue support chats with seller or admin</li>
+            <li>Manage cart, checkout details, and saved profile data</li>
+          </ul>
+        </article>
 
-        <label className="text-sm font-medium text-slate-200" htmlFor="password">Password</label>
-        <input
-          className="wm-input"
-          id="password"
-          type="password"
-          value={form.password}
-          onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-          required
-        />
+        <form className="wm-panel grid gap-2 p-5" onSubmit={onSubmit}>
+          <label className="text-sm font-medium text-slate-700" htmlFor="email">Email</label>
+          <input
+            className="wm-input"
+            id="email"
+            type="email"
+            value={form.email}
+            onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+            required
+          />
 
-        {error ? <p className="m-0 text-sm text-rose-300">{error}</p> : null}
+          <label className="text-sm font-medium text-slate-700" htmlFor="password">Password</label>
+          <input
+            className="wm-input"
+            id="password"
+            type="password"
+            value={form.password}
+            onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+            required
+          />
 
-        <button className="wm-btn-primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+          {error ? <p className="m-0 text-sm text-rose-600">{error}</p> : null}
 
-      <p className="text-sm text-slate-300">
-        Don&apos;t have an account? <Link className="font-semibold wm-price" to="/register">Create one</Link>
-      </p>
+          <button className="wm-btn-primary mt-2" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign in"}
+          </button>
+
+          <p className="m-0 mt-2 text-sm text-slate-600">
+            Don&apos;t have an account? <Link className="font-semibold text-slate-900 underline" to="/register">Create one</Link>
+          </p>
+        </form>
+      </section>
     </PageShell>
   );
 }

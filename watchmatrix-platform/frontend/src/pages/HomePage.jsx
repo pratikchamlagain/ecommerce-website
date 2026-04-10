@@ -130,20 +130,21 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {flashDeals.map((product) => {
             const basePrice = Number(product.price);
             const offerPrice = Number((basePrice * 0.88).toFixed(2));
 
             return (
-              <article className="wm-card p-3" key={`flash-${product.id}`}>
-                <img
-                  className="h-44 w-full rounded-xl object-cover"
-                  src={product.imageUrl}
-                  alt={product.name}
-                  loading="lazy"
-                  onError={(event) => onProductImageError(event, product)}
-                />
+              <article className="wm-card overflow-hidden p-3" key={`flash-${product.id}`}>
+                <Link className="wm-image-frame block h-48" to={`/products/${product.slug}`}>
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    loading="lazy"
+                    onError={(event) => onProductImageError(event, product)}
+                  />
+                </Link>
                 <p className="mb-1 mt-3 text-sm text-slate-500">{product.brand}</p>
                 <h5 className="m-0 text-base font-semibold text-slate-900">{product.name}</h5>
                 <p className="mt-2 text-lg font-bold text-rose-700">Rs. {offerPrice.toFixed(2)}</p>
@@ -151,13 +152,18 @@ export default function HomePage() {
               </article>
             );
           })}
+          {flashDeals.length === 0 ? (
+            <div className="wm-card md:col-span-2 xl:col-span-4 p-4 text-sm text-slate-600">
+              Flash deals will appear here when new products are available.
+            </div>
+          ) : null}
         </div>
       </section>
 
       <section className="mt-5 rounded-2xl border border-black/15 bg-white p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h4 className="m-0 text-2xl text-slate-900">Category Visual Gallery</h4>
-          <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Recovered from legacy build</span>
+          <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Preview without opening product pages</span>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -170,18 +176,18 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <div className="overflow-x-auto pb-2">
-                <div className="flex min-w-max gap-3">
-                  {(getCategoryLegacyGallery(category.slug) || [getCategoryLegacyImage(category.slug)]).map((image, index) => (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {(getCategoryLegacyGallery(category.slug).slice(0, 4).length > 0
+                  ? getCategoryLegacyGallery(category.slug).slice(0, 4)
+                  : [getCategoryLegacyImage(category.slug)]).map((image, index) => (
+                  <div className="wm-image-frame h-24" key={`${category.slug}-${index}`}>
                     <img
-                      className="h-28 w-40 rounded-xl object-cover"
-                      key={`${category.slug}-${index}`}
                       src={image}
                       alt={`${category.label} watch ${index + 1}`}
                       loading="lazy"
                     />
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </article>
           ))}
@@ -223,13 +229,14 @@ export default function HomePage() {
                   {group.products.map((product) => (
                     <div className="wm-card p-3" key={product.id}>
                       <Link to={`/products/${product.slug}`}>
-                        <img
-                          className="h-40 w-full rounded-xl bg-slate-800 object-cover"
-                          src={product.imageUrl}
-                          alt={product.name}
-                          loading="lazy"
-                          onError={(event) => onProductImageError(event, product)}
-                        />
+                        <div className="wm-image-frame h-40">
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            loading="lazy"
+                            onError={(event) => onProductImageError(event, product)}
+                          />
+                        </div>
                       </Link>
                       <h5 className="mb-1 mt-3 text-base font-semibold text-slate-900">{product.name}</h5>
                       <p className="my-1 text-sm text-slate-500">{product.brand}</p>
