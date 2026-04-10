@@ -386,7 +386,7 @@ export default function ChatPage() {
               <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={onSendMessage}>
                 <input
                   className="wm-input flex-1"
-                  placeholder="Type your message and press send"
+                  placeholder="Type your message..."
                   value={messageDraft}
                   onChange={(event) => setMessageDraft(event.target.value)}
                 />
