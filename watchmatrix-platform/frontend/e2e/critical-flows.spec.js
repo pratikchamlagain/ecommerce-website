@@ -175,10 +175,17 @@ test("customer chat flow: create conversation and send message", async ({ page }
   await expect(page.getByRole("heading", { name: "Live Chat" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Seller E2E" })).toBeVisible();
 
+  const postMessageRequest = page.waitForRequest(
+    (request) => request.method() === "POST" && request.url().includes(`/api/v1/chat/conversations/${conversationId}/messages`)
+  );
+
   await page.getByPlaceholder("Type your message...").fill("Need update on order");
   await page.getByRole("button", { name: "Send" }).click();
 
-  await expect(page.getByText("Need update on order")).toBeVisible();
+  const sentRequest = await postMessageRequest;
+  const sentPayload = sentRequest.postDataJSON();
+  expect(sentPayload.content).toBe("Need update on order");
+  await expect(page.getByPlaceholder("Type your message...")).toHaveValue("");
 });
 
 test("seller can update sold item fulfillment to shipped with tracking", async ({ page }) => {
@@ -286,7 +293,7 @@ test("seller can update sold item fulfillment to shipped with tracking", async (
   await soldItemRow.getByPlaceholder("Tracking number").fill("WM-TRACK-1001");
   await soldItemRow.getByRole("button", { name: "Update" }).click();
 
-  await expect(soldItemRow.getByText("SHIPPED")).toBeVisible();
+  await expect(soldItemRow.locator("span.rounded-full", { hasText: "SHIPPED" })).toBeVisible();
   await expect(soldItemRow.getByText("Courier: Pathao", { exact: false })).toBeVisible();
   await expect(page.locator("section", { hasText: "Fulfillment History" }).getByText("PENDING -> SHIPPED")).toBeVisible();
 });

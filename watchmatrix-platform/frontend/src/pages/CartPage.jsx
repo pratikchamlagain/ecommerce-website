@@ -1,4 +1,5 @@
 import PageShell from "../components/common/PageShell";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchProducts } from "../lib/productsApi";
@@ -8,6 +9,7 @@ import { getAccessToken } from "../lib/authStorage";
 export default function CartPage() {
   const queryClient = useQueryClient();
   const token = getAccessToken();
+  const [actionError, setActionError] = useState("");
 
   const cartQuery = useQuery({
     queryKey: ["cart"],
@@ -23,22 +25,46 @@ export default function CartPage() {
 
   const addMutation = useMutation({
     mutationFn: addToCart,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] })
+    onSuccess: () => {
+      setActionError("");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (error) => {
+      setActionError(error?.response?.data?.message || "Could not add this product to cart.");
+    }
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ itemId, quantity }) => updateCartItem(itemId, quantity),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] })
+    onSuccess: () => {
+      setActionError("");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (error) => {
+      setActionError(error?.response?.data?.message || "Could not update item quantity.");
+    }
   });
 
   const removeMutation = useMutation({
     mutationFn: removeCartItem,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] })
+    onSuccess: () => {
+      setActionError("");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (error) => {
+      setActionError(error?.response?.data?.message || "Could not remove this item.");
+    }
   });
 
   const clearMutation = useMutation({
     mutationFn: clearCart,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] })
+    onSuccess: () => {
+      setActionError("");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (error) => {
+      setActionError(error?.response?.data?.message || "Could not clear your cart.");
+    }
   });
 
   if (!token) {
@@ -75,6 +101,8 @@ export default function CartPage() {
             </button>
           </div>
 
+          {actionError ? <p className="mb-4 text-sm text-rose-300">{actionError}</p> : null}
+
           <section className="mb-5 grid gap-3">
             {cart.items.length === 0 ? <p className="wm-panel wm-muted">Your cart is empty.</p> : null}
 
@@ -86,6 +114,7 @@ export default function CartPage() {
                   <p className="my-1 text-sm text-slate-400">{item.product.brand}</p>
                   <p className="text-slate-200">Rs. {item.product.price.toFixed(2)}</p>
                   <p className="text-slate-300">Subtotal: <span className="wm-price">Rs. {item.subtotal.toFixed(2)}</span></p>
+                  <p className="m-0 text-xs text-slate-400">Available stock: {item.product.stock}</p>
                   <div className="mt-2 flex items-center gap-2">
                     <button
                       className="wm-btn-secondary px-3 py-1"
@@ -100,7 +129,7 @@ export default function CartPage() {
                       className="wm-btn-secondary px-3 py-1"
                       type="button"
                       onClick={() => updateMutation.mutate({ itemId: item.id, quantity: item.quantity + 1 })}
-                      disabled={updateMutation.isPending}
+                      disabled={updateMutation.isPending || item.quantity >= item.product.stock}
                     >
                       +
                     </button>
@@ -126,13 +155,14 @@ export default function CartPage() {
                 <h3 className="mb-1 mt-3 text-base font-semibold text-white">{product.name}</h3>
                 <p className="my-1 text-sm text-slate-400">{product.brand}</p>
                 <p className="wm-price mt-2 font-bold">Rs. {product.price.toFixed(2)}</p>
+                <p className="m-0 mt-1 text-xs text-slate-500">Stock: {product.stock}</p>
                 <button
                   className="wm-btn-primary mt-3 rounded-xl px-3"
                   type="button"
                   onClick={() => addMutation.mutate({ productId: product.id, quantity: 1 })}
-                  disabled={addMutation.isPending}
+                  disabled={addMutation.isPending || product.stock <= 0}
                 >
-                  Add to Cart
+                  {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
                 </button>
               </article>
             ))}

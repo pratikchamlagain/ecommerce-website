@@ -1,8 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import os from "node:os";
+import path from "node:path";
+
+const playwrightOutputDir = path.join(os.tmpdir(), "watchmatrix-playwright-results");
 
 export default defineConfig({
   testDir: "./e2e",
-  outputDir: "./.playwright-results",
+  outputDir: playwrightOutputDir,
   timeout: 45_000,
   expect: {
     timeout: 10_000

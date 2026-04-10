@@ -11,6 +11,7 @@ import notificationsRouter from "./modules/notifications/notifications.routes.js
 import chatRouter from "./modules/chat/chat.routes.js";
 import sellerProductsRouter from "./modules/sellerProducts/sellerProducts.routes.js";
 import adminRouter from "./modules/admin/admin.routes.js";
+import paymentsRouter from "./modules/payments/payments.routes.js";
 import prisma from "./config/prisma.js";
 import { logger } from "./utils/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -83,6 +84,7 @@ app.use("/api/v1/notifications", notificationsRouter);
 app.use("/api/v1/chat", chatRouter);
 app.use("/api/v1/seller", sellerProductsRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/payments", paymentsRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ ok: false, message: "Route not found" });

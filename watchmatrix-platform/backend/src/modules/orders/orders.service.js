@@ -79,7 +79,15 @@ function withSellerStatusMeta(item) {
   };
 }
 
-export async function createOrder(userId, payload) {
+export async function createOrder(userId, payload, options = {}) {
+  const { paymentVerified = false } = options;
+
+  if (payload.paymentMethod !== "COD" && !paymentVerified) {
+    const err = new Error("Only Cash on Delivery is currently available");
+    err.statusCode = 400;
+    throw err;
+  }
+
   const cart = await prisma.cart.findUnique({
     where: { userId },
     include: {

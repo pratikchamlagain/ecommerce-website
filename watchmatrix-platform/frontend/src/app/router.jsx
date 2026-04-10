@@ -5,6 +5,7 @@ import ProductDetailPage from "../pages/ProductDetailPage";
 import CartPage from "../pages/CartPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderSuccessPage from "../pages/OrderSuccessPage";
+import PaymentReturnPage from "../pages/PaymentReturnPage";
 import OrderDetailPage from "../pages/OrderDetailPage";
 import SellerDashboardPage from "../pages/SellerDashboardPage";
 import AdminDashboardPage from "../pages/AdminDashboardPage";
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
   { path: "/cart", element: <CartPage /> },
   { path: "/checkout", element: <CheckoutPage /> },
   { path: "/order-success", element: <OrderSuccessPage /> },
+  { path: "/payment-return", element: <PaymentReturnPage /> },
   {
     path: "/seller",
     element: (
