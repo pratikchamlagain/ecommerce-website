@@ -7,7 +7,46 @@ import { fetchCart } from "../lib/cartApi";
 import { getAccessToken } from "../lib/authStorage";
 import { fetchMe } from "../lib/authApi";
 import { placeOrder } from "../lib/ordersApi";
-import { initiateEsewaPayment, initiateKhaltiPayment } from "../lib/paymentsApi";
+import { initiateEsewa, initiateKhalti } from "../lib/paymentsApi";
+
+function toProviderCheckout(form) {
+  if (form.paymentMethod === "KHALTI") {
+    return {
+      ...form,
+      paymentMethod: "CARD"
+    };
+  }
+
+  if (form.paymentMethod === "ESEWA") {
+    return {
+      ...form,
+      paymentMethod: "BANK_TRANSFER"
+    };
+  }
+
+  return form;
+}
+
+function paymentStorageKey(ref) {
+  return `wm-payment-checkout-${ref}`;
+}
+
+function submitEsewaForm(paymentUrl, payload) {
+  const formElement = document.createElement("form");
+  formElement.method = "POST";
+  formElement.action = paymentUrl;
+
+  Object.entries(payload).forEach(([key, value]) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = String(value ?? "");
+    formElement.appendChild(input);
+  });
+
+  document.body.appendChild(formElement);
+  formElement.submit();
+}
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -52,48 +91,18 @@ export default function CheckoutPage() {
   });
 
   const initiateKhaltiMutation = useMutation({
-    mutationFn: initiateKhaltiPayment,
-    onSuccess: (data) => {
-      sessionStorage.setItem("wm_pending_checkout", JSON.stringify({
-        provider: "khalti",
-        checkout: form,
-        pidx: data.pidx,
-        transactionRef: data.transactionRef
-      }));
-
-      window.location.href = data.paymentUrl;
-    },
+    mutationFn: initiateKhalti,
     onError: (error) => {
-      setSubmitError(error?.response?.data?.message || "Could not start Khalti payment");
+      const detail = error?.response?.data?.details;
+      const providerMessage = detail?.detail || detail?.message;
+      setSubmitError(providerMessage || error?.response?.data?.message || "Could not initiate Khalti payment");
     }
   });
 
   const initiateEsewaMutation = useMutation({
-    mutationFn: initiateEsewaPayment,
-    onSuccess: (data) => {
-      sessionStorage.setItem("wm_pending_checkout", JSON.stringify({
-        provider: "esewa",
-        checkout: form,
-        transactionRef: data.transactionRef
-      }));
-
-      const paymentForm = document.createElement("form");
-      paymentForm.method = "POST";
-      paymentForm.action = data.paymentUrl;
-
-      Object.entries(data.formData).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = String(value);
-        paymentForm.appendChild(input);
-      });
-
-      document.body.appendChild(paymentForm);
-      paymentForm.submit();
-    },
+    mutationFn: initiateEsewa,
     onError: (error) => {
-      setSubmitError(error?.response?.data?.message || "Could not start eSewa payment");
+      setSubmitError(error?.response?.data?.message || "Could not initiate eSewa payment");
     }
   });
 
@@ -116,7 +125,7 @@ export default function CheckoutPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
     setSubmitError("");
 
@@ -130,18 +139,24 @@ export default function CheckoutPage() {
       return;
     }
 
+    const providerCheckout = toProviderCheckout(form);
+
     if (form.paymentMethod === "KHALTI") {
-      initiateKhaltiMutation.mutate(form);
+      const payment = await initiateKhaltiMutation.mutateAsync(providerCheckout);
+      window.localStorage.setItem(paymentStorageKey(payment.paymentRef), JSON.stringify(providerCheckout));
+      window.location.href = payment.paymentUrl;
       return;
     }
 
     if (form.paymentMethod === "ESEWA") {
-      initiateEsewaMutation.mutate(form);
-      return;
+      const payment = await initiateEsewaMutation.mutateAsync(providerCheckout);
+      window.localStorage.setItem(paymentStorageKey(payment.paymentRef), JSON.stringify(providerCheckout));
+      submitEsewaForm(payment.paymentUrl, payment.payload);
     }
-
-    setSubmitError("Unsupported payment method selected.");
   }
+
+  const isSubmitting =
+    placeOrderMutation.isPending || initiateKhaltiMutation.isPending || initiateEsewaMutation.isPending;
 
   return (
     <PageShell title="Checkout">
@@ -174,27 +189,16 @@ export default function CheckoutPage() {
             <textarea className="wm-input sm:col-span-2" name="notes" placeholder="Order note (optional)" rows={3} value={form.notes} onChange={onChange} />
           </div>
 
-          {form.paymentMethod === "COD" ? (
-            <p className="mb-0 mt-2 text-xs text-slate-600">Order will be confirmed immediately and paid by Cash On Delivery.</p>
-          ) : null}
-          {form.paymentMethod === "KHALTI" ? (
-            <p className="mb-0 mt-2 text-xs text-slate-600">You will be redirected to Khalti secure checkout and returned here after payment.</p>
-          ) : null}
-          {form.paymentMethod === "ESEWA" ? (
-            <p className="mb-0 mt-2 text-xs text-slate-600">You will be redirected to eSewa secure checkout and returned here after payment.</p>
-          ) : null}
+          <p className="mb-0 mt-2 text-xs text-slate-600">Choose COD, Khalti, or eSewa to complete your order.</p>
 
           {submitError ? <p className="mb-0 mt-3 text-sm text-rose-700">{submitError}</p> : null}
 
           <button
             className="wm-btn-primary mt-4"
             type="submit"
-            disabled={!token || !cart || cart.items.length === 0 || placeOrderMutation.isPending || initiateKhaltiMutation.isPending || initiateEsewaMutation.isPending}
+            disabled={!token || !cart || cart.items.length === 0 || isSubmitting}
           >
-            {placeOrderMutation.isPending ? "Placing Order..." : null}
-            {initiateKhaltiMutation.isPending ? "Redirecting to Khalti..." : null}
-            {initiateEsewaMutation.isPending ? "Redirecting to eSewa..." : null}
-            {!placeOrderMutation.isPending && !initiateKhaltiMutation.isPending && !initiateEsewaMutation.isPending ? "Place Order" : null}
+            {isSubmitting ? "Processing..." : "Place Order"}
           </button>
         </form>
 

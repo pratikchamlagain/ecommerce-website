@@ -36,12 +36,17 @@ export default function PageShell({ title, children }) {
     { to: "/products", label: "Products" },
     { to: "/cart", label: "Cart" },
     { to: "/checkout", label: "Checkout" },
+    { to: "/payments", label: "Payments" },
     { to: "/about", label: "About" },
     { to: "/chat", label: "Chat" },
     { to: "/login", label: "Login" },
     { to: "/register", label: "Register" },
     { to: "/profile", label: "Profile" }
   ];
+
+  if (authUser?.role === "ADMIN") {
+    navItems.splice(5, 0, { to: "/admin/payments", label: "Admin Payments" });
+  }
 
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") {

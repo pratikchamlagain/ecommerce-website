@@ -1,26 +1,26 @@
 import apiClient from "./apiClient";
 
-export async function initiateEsewaPayment(checkout) {
+export async function initiateEsewa(checkout) {
   const response = await apiClient.post("/payments/esewa/initiate", { checkout });
   return response.data.data;
 }
 
-export async function verifyEsewaPayment(data, checkout) {
-  const response = await apiClient.post("/payments/esewa/verify", { data, checkout });
+export async function verifyEsewa(payload) {
+  const response = await apiClient.post("/payments/esewa/verify", payload);
   return response.data.data;
 }
 
-export async function initiateKhaltiPayment(checkout) {
+export async function initiateKhalti(checkout) {
   const response = await apiClient.post("/payments/khalti/initiate", { checkout });
   return response.data.data;
 }
 
-export async function verifyKhaltiPayment(pidx, checkout) {
-  const response = await apiClient.post("/payments/khalti/verify", { pidx, checkout });
+export async function verifyKhalti(payload) {
+  const response = await apiClient.post("/payments/khalti/verify", payload);
   return response.data.data;
 }
 
-export async function fetchMyPaymentHistory(params = {}) {
+export async function fetchPaymentHistory(params = {}) {
   const response = await apiClient.get("/payments/history", { params });
   return response.data.data;
 }

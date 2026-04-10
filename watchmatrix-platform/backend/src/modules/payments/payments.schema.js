@@ -9,7 +9,7 @@ export const checkoutPayloadSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   postalCode: z.string().trim().min(3, "Postal code is required"),
   notes: z.string().trim().max(500).optional(),
-  paymentMethod: z.enum(["COD", "KHALTI", "ESEWA"])
+  paymentMethod: z.enum(["COD", "CARD", "BANK_TRANSFER"])
 });
 
 export const initiateKhaltiSchema = z.object({
@@ -18,6 +18,7 @@ export const initiateKhaltiSchema = z.object({
 
 export const verifyKhaltiSchema = z.object({
   pidx: z.string().trim().min(1),
+  paymentRef: z.string().trim().optional(),
   checkout: checkoutPayloadSchema
 });
 
@@ -26,7 +27,8 @@ export const initiateEsewaSchema = z.object({
 });
 
 export const verifyEsewaSchema = z.object({
-  data: z.string().trim().min(1),
+  data: z.string().trim().min(1).optional(),
+  paymentRef: z.string().trim().optional(),
   checkout: checkoutPayloadSchema
 });
 

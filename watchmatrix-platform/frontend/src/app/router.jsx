@@ -5,7 +5,6 @@ import ProductDetailPage from "../pages/ProductDetailPage";
 import CartPage from "../pages/CartPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderSuccessPage from "../pages/OrderSuccessPage";
-import PaymentReturnPage from "../pages/PaymentReturnPage";
 import OrderDetailPage from "../pages/OrderDetailPage";
 import SellerDashboardPage from "../pages/SellerDashboardPage";
 import AdminDashboardPage from "../pages/AdminDashboardPage";
@@ -16,6 +15,10 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProfilePage from "../pages/ProfilePage";
 import ChatPage from "../pages/ChatPage";
+import PaymentStatusPage from "../pages/PaymentStatusPage";
+import PaymentFailurePage from "../pages/PaymentFailurePage";
+import PaymentHistoryPage from "../pages/PaymentHistoryPage";
+import AdminPaymentHistoryPage from "../pages/AdminPaymentHistoryPage";
 import RequireAuth from "./RequireAuth";
 
 export const router = createBrowserRouter([
@@ -25,7 +28,6 @@ export const router = createBrowserRouter([
   { path: "/cart", element: <CartPage /> },
   { path: "/checkout", element: <CheckoutPage /> },
   { path: "/order-success", element: <OrderSuccessPage /> },
-  { path: "/payment-return", element: <PaymentReturnPage /> },
   {
     path: "/seller",
     element: (
@@ -74,6 +76,38 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <ChatPage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/payments",
+    element: (
+      <RequireAuth>
+        <PaymentHistoryPage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/admin/payments",
+    element: (
+      <RequireAuth allowedRoles={["ADMIN"]}>
+        <AdminPaymentHistoryPage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/payment/:provider/success",
+    element: (
+      <RequireAuth>
+        <PaymentStatusPage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: "/payment/failure",
+    element: (
+      <RequireAuth>
+        <PaymentFailurePage />
       </RequireAuth>
     )
   },

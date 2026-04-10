@@ -2,21 +2,21 @@ import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth.js";
 import {
   adminPaymentHistory,
-  initiateEsewaPayment,
-  initiateKhaltiPayment,
-  myPaymentHistory,
-  verifyEsewaPayment,
-  verifyKhaltiPayment
+  customerPaymentHistory,
+  initiateEsewa,
+  initiateKhalti,
+  verifyEsewa,
+  verifyKhalti
 } from "./payments.controller.js";
 
 const paymentsRouter = Router();
 
 paymentsRouter.use(requireAuth);
-paymentsRouter.post("/esewa/initiate", initiateEsewaPayment);
-paymentsRouter.post("/esewa/verify", verifyEsewaPayment);
-paymentsRouter.post("/khalti/initiate", initiateKhaltiPayment);
-paymentsRouter.post("/khalti/verify", verifyKhaltiPayment);
-paymentsRouter.get("/history", myPaymentHistory);
+paymentsRouter.post("/esewa/initiate", initiateEsewa);
+paymentsRouter.post("/esewa/verify", verifyEsewa);
+paymentsRouter.post("/khalti/initiate", initiateKhalti);
+paymentsRouter.post("/khalti/verify", verifyKhalti);
+paymentsRouter.get("/history", customerPaymentHistory);
 paymentsRouter.get("/admin/history", adminPaymentHistory);
 
 export default paymentsRouter;
