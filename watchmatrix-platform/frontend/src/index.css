@@ -110,7 +110,12 @@
   }
 
   .wm-card {
-    @apply rounded-2xl border border-slate-200 bg-white/95 shadow-sm;
+    @apply rounded-2xl border border-slate-200 bg-white/95 shadow-sm transition duration-300;
+  }
+
+  .wm-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 35px -25px rgb(15 23 42 / 0.5);
   }
 
   .wm-muted {
@@ -148,5 +153,52 @@
   .wm-auth-side {
     @apply rounded-3xl border border-slate-900/10 p-6 text-slate-900;
     background: linear-gradient(140deg, #fcfaf6, #f2ece3);
+  }
+
+  .wm-hero-overlay {
+    background: linear-gradient(120deg, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.48), rgb(0 0 0 / 0.1));
+  }
+
+  .wm-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: wm-fade-up 0.55s ease-out forwards;
+  }
+
+  .wm-hero-image {
+    animation: wm-hero-pan 16s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+
+  .wm-mobile-sheet {
+    @apply border-t border-slate-200 bg-white/95 px-3 pb-3 pt-2 md:hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .wm-mobile-nav-grid {
+    @apply grid gap-2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@keyframes wm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wm-hero-pan {
+  from {
+    transform: scale(1.02);
+  }
+
+  to {
+    transform: scale(1.08);
   }
 }

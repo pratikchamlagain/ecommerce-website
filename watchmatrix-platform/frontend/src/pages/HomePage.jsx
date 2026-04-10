@@ -86,13 +86,13 @@ export default function HomePage() {
 
   return (
     <PageShell title="Crafted For Every Moment">
-      <section className="relative overflow-hidden rounded-3xl border border-black/20 bg-slate-900 text-white">
+      <section className="wm-reveal relative overflow-hidden rounded-3xl border border-black/20 bg-slate-900 text-white" style={{ animationDelay: "0.05s" }}>
         <img
           alt="Luxury watch hero"
-          className="h-[520px] w-full object-cover opacity-55"
+          className="wm-hero-image h-[520px] w-full object-cover opacity-55"
           src={getCategoryLegacyImage("luxury")}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10" />
+        <div className="wm-hero-overlay absolute inset-0" />
 
         <div className="absolute inset-0 flex items-end p-8 md:p-12">
           <div className="max-w-2xl">
@@ -110,8 +110,8 @@ export default function HomePage() {
       </section>
 
       <section className="mt-5 grid gap-3 md:grid-cols-3">
-        {highlights.map((item) => (
-          <article className="wm-card p-5" key={item.title}>
+        {highlights.map((item, index) => (
+          <article className="wm-card wm-reveal p-5" key={item.title} style={{ animationDelay: `${0.1 + index * 0.08}s` }}>
             <h4 className="m-0 text-xl text-slate-900">{item.title}</h4>
             <p className="mb-0 mt-2 text-sm text-slate-600">{item.text}</p>
             <button className="wm-btn-secondary mt-4" type="button">{item.cta}</button>
@@ -119,7 +119,7 @@ export default function HomePage() {
         ))}
       </section>
 
-      <section className="mt-5 rounded-2xl border border-black/15 bg-white p-4">
+      <section className="wm-reveal mt-5 rounded-2xl border border-black/15 bg-white p-4" style={{ animationDelay: "0.22s" }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="m-0 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Daraz-inspired feature</p>
@@ -147,6 +147,7 @@ export default function HomePage() {
                 </Link>
                 <p className="mb-1 mt-3 text-sm text-slate-500">{product.brand}</p>
                 <h5 className="m-0 text-base font-semibold text-slate-900">{product.name}</h5>
+                <p className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800">Flash Price</p>
                 <p className="mt-2 text-lg font-bold text-rose-700">Rs. {offerPrice.toFixed(2)}</p>
                 <p className="m-0 text-sm text-slate-500 line-through">Rs. {basePrice.toFixed(2)}</p>
               </article>
@@ -160,7 +161,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mt-5 rounded-2xl border border-black/15 bg-white p-4">
+      <section className="wm-reveal mt-5 rounded-2xl border border-black/15 bg-white p-4" style={{ animationDelay: "0.28s" }}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h4 className="m-0 text-2xl text-slate-900">Category Visual Gallery</h4>
           <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Preview without opening product pages</span>
@@ -194,7 +195,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mt-8">
+      <section className="wm-reveal mt-8" style={{ animationDelay: "0.34s" }}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="m-0 text-3xl text-slate-900">Featured Categories</h3>
           <Link className="wm-btn-secondary rounded-full px-4" to="/products?page=1">View All Products</Link>

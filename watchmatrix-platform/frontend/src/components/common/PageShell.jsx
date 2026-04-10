@@ -9,6 +9,7 @@ export default function PageShell({ title, children }) {
   const token = getAccessToken();
   const authUser = getAuthUser();
   const [search, setSearch] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const chatConversationsQuery = useQuery({
     queryKey: ["chat-conversations"],
@@ -64,6 +65,10 @@ export default function PageShell({ title, children }) {
     window.localStorage.setItem("wm-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [token]);
+
   function onSearchSubmit(event) {
     event.preventDefault();
     const keyword = search.trim();
@@ -83,7 +88,16 @@ export default function PageShell({ title, children }) {
 
       <div className="border-b border-black/10 bg-white/90 backdrop-blur">
         <div className="mx-auto grid w-[min(1320px,95%)] gap-3 py-4 md:grid-cols-[auto_1fr_auto] md:items-center">
-          <Link className="text-4xl font-black tracking-[0.18em] text-slate-900" to="/">WM</Link>
+          <div className="flex items-center justify-between gap-3">
+            <Link className="text-4xl font-black tracking-[0.18em] text-slate-900" to="/">WM</Link>
+            <button
+              className="wm-btn-secondary px-3 py-1.5 text-xs md:hidden"
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+            >
+              {mobileMenuOpen ? "Close" : "Menu"}
+            </button>
+          </div>
 
           <form className="flex gap-2" onSubmit={onSearchSubmit}>
             <input
@@ -159,6 +173,26 @@ export default function PageShell({ title, children }) {
             ) : null}
           </div>
         </div>
+
+        {mobileMenuOpen ? (
+          <div className="wm-mobile-sheet">
+            <div className="wm-mobile-nav-grid">
+              {[...primaryNav, ...supportNav, ...accountNav].map((item) => (
+                <NavLink
+                  className={({ isActive }) => (isActive ? "wm-nav-link wm-nav-link-active" : "wm-nav-link")}
+                  key={`mobile-${item.to}`}
+                  to={item.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+            {token ? (
+              <button className="wm-btn-secondary mt-2 w-full" type="button" onClick={onLogout}>Logout</button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <main className="pb-12 pt-6">
