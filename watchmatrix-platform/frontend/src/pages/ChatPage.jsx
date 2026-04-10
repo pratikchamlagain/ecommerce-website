@@ -207,7 +207,7 @@ export default function ChatPage() {
   }
 
   return (
-    <PageShell title="Support Chat Center">
+    <PageShell title="Live Chat">
       <section className="grid gap-5 lg:grid-cols-[360px_1fr]">
         <aside className="wm-card p-4">
           <h3 className="m-0 text-lg text-slate-900">Start or Continue a Conversation</h3>
