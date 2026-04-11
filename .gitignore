@@ -1,0 +1,12 @@
+# Prevent accidental archive commits
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
+# Local backup folders/files
+backup/
+backups/
+*.bak
