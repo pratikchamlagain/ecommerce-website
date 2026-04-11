@@ -5,6 +5,11 @@ export async function registerUser(payload) {
   return response.data.data;
 }
 
+export async function registerAdminUser(payload) {
+  const response = await apiClient.post("/auth/register-admin", payload);
+  return response.data.data;
+}
+
 export async function loginUser(payload) {
   const response = await apiClient.post("/auth/login", payload);
   return response.data.data;

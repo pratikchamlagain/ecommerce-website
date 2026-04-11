@@ -32,6 +32,24 @@ model User {
   chatMemberships ConversationMember[]
   createdConversations Conversation[]
   sentMessages Message[] @relation("MessageSender")
+  sellerProfile SellerProfile?
+}
+
+model SellerProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  businessName       String
+  businessType       String
+  businessAddress    String
+  panOrVat           String
+  phone              String
+  yearsInBusiness    Int?
+  monthlyOrderVolume String?
+  websiteUrl         String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {

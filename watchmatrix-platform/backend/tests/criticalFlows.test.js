@@ -11,9 +11,24 @@ function unique(prefix) {
 }
 
 async function registerUserViaApi({ fullName, email, password, role }) {
+  const payload = { fullName, email, password, role };
+
+  if (role === "SELLER") {
+    payload.sellerProfile = {
+      businessName: `${fullName} Ventures`,
+      businessType: "Retail",
+      businessAddress: "Kathmandu Trade Center",
+      panOrVat: `PAN-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      phone: "9800000001",
+      yearsInBusiness: 3,
+      monthlyOrderVolume: "50-100",
+      websiteUrl: "https://example-seller.test"
+    };
+  }
+
   const response = await request(app)
     .post("/api/v1/auth/register")
-    .send({ fullName, email, password, role });
+    .send(payload);
 
   assert.equal(response.statusCode, 201);
   return response.body.data;

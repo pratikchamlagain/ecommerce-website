@@ -44,8 +44,8 @@ export default function PageShell({ title, children }) {
   const accountNav = token
     ? [
       { to: "/profile", label: "Profile" },
-      ...(authUser?.role === "SELLER" ? [{ to: "/seller/dashboard", label: "Seller" }] : []),
-      ...(authUser?.role === "ADMIN" ? [{ to: "/admin/dashboard", label: "Admin" }, { to: "/admin/payments", label: "Admin Payments" }] : [])
+      ...(authUser?.role === "SELLER" ? [{ to: "/seller", label: "Seller" }] : []),
+      ...(authUser?.role === "ADMIN" ? [{ to: "/admin", label: "Admin" }, { to: "/admin/payments", label: "Admin Payments" }] : [])
     ]
     : [
       { to: "/login", label: "Login" },

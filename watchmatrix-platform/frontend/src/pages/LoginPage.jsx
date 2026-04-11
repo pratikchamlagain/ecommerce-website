@@ -43,6 +43,14 @@ export default function LoginPage() {
             <li>Continue support chats with seller or admin</li>
             <li>Manage cart, checkout details, and saved profile data</li>
           </ul>
+
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white/80 p-3">
+            <p className="m-0 text-sm font-semibold text-slate-900">Need first admin access?</p>
+            <p className="m-0 mt-1 text-xs text-slate-600">
+              Use the protected admin setup flow once with your backend setup key.
+            </p>
+            <Link className="wm-btn-secondary mt-3 inline-flex text-xs" to="/admin/setup">Open Admin Setup</Link>
+          </div>
         </article>
 
         <form className="wm-panel grid gap-2 p-5" onSubmit={onSubmit}>

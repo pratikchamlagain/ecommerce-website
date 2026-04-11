@@ -71,10 +71,32 @@ ALLOW_PROD_SEED=true
 
 - `GET /api/v1/health`
 - `POST /api/v1/auth/register`
+- `POST /api/v1/auth/register-admin`
 - `POST /api/v1/auth/login`
 - `GET /api/v1/auth/me`
 - `GET /api/v1/products`
 - `GET /api/v1/products/:slug`
+
+## Registration Flows
+
+- Customer registration is intentionally simple (name, email, password).
+- Seller registration requires business onboarding details:
+	- Business name/type/address
+	- PAN or VAT
+	- Business phone
+	- Optional years in business, monthly volume, website URL
+
+## Admin Access Setup
+
+To create the first admin from the website:
+
+1. Set `ADMIN_SETUP_KEY` in backend `.env`.
+2. Start backend and frontend.
+3. Open `/admin/setup` in the frontend.
+4. Submit admin details with the setup key.
+5. Afterwards, use regular `/login` as admin.
+
+The backend allows admin bootstrap only when no admin user already exists.
 
 ## Why Legacy Folders Were Removed
 

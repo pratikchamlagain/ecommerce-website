@@ -13,6 +13,7 @@ import AboutPage from "../pages/AboutPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import AdminSetupPage from "../pages/AdminSetupPage";
 import ProfilePage from "../pages/ProfilePage";
 import ChatPage from "../pages/ChatPage";
 import PaymentStatusPage from "../pages/PaymentStatusPage";
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
   { path: "/about", element: <AboutPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
+  { path: "/admin/setup", element: <AdminSetupPage /> },
   {
     path: "/profile",
     element: (

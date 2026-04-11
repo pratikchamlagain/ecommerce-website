@@ -1,5 +1,5 @@
-import { loginSchema, registerSchema } from "./auth.schema.js";
-import { getCurrentUser, loginUser, registerUser } from "./auth.service.js";
+import { bootstrapAdminSchema, loginSchema, registerSchema } from "./auth.schema.js";
+import { bootstrapAdmin, getCurrentUser, loginUser, registerUser } from "./auth.service.js";
 
 function applyAuthResponseHygiene(res) {
   res.setHeader("Cache-Control", "no-store");
@@ -25,6 +25,30 @@ export async function register(req, res, next) {
         errors: error.issues
       });
     }
+    return next(error);
+  }
+}
+
+export async function registerAdmin(req, res, next) {
+  try {
+    const payload = bootstrapAdminSchema.parse(req.body);
+    const result = await bootstrapAdmin(payload);
+    applyAuthResponseHygiene(res);
+
+    return res.status(201).json({
+      ok: true,
+      message: "Admin account created",
+      data: result
+    });
+  } catch (error) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        ok: false,
+        message: "Validation failed",
+        errors: error.issues
+      });
+    }
+
     return next(error);
   }
 }
